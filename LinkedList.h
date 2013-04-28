@@ -10,6 +10,13 @@
  * The iterator iterates in the order of the elements being loaded into this list.
  */
 
+template<class T1,class T2>
+void appendAll(T1 &v1,const T2 &v2)
+	{
+	typename T2::Iterator tmp=v2.Iterator();
+	while(tmp.hasNext) v1.add(tmp.next());
+	}
+
 template<class T>
 class LinkedList
 	{
@@ -29,6 +36,7 @@ class LinkedList
 			~Node()
 				{
 				if(data) delete []data;
+				data=NULL;
 				}
 
 			void insert(const T &element)
@@ -104,12 +112,25 @@ class LinkedList
 		 */
 		LinkedList(const LinkedList<T> &list)
 			{
+			head=last=new Node();
+			nowSize=0;
+			head->pre=head;
+			appendAll(*this,list);
 			}
 		/*
 		 * Destructor
 		 */
 		~LinkedList()
 			{
+			clear();
+			delete head;
+			}
+		
+		LinkedList<T>& operator=(const LinkedList<T> &list)
+			{
+			this->clear();
+			appendAll(*this,c);
+			return *this;
 			}
 
 		/*
