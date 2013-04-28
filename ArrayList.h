@@ -1,9 +1,8 @@
 #ifndef __ARRAYLIST_H
 #define __ARRAYLIST_H
 
-#include "IndexOutOfBound.h"
-#include "ElementNotExist.h"
 #include<memory.h>
+#include "Utility.h"
 
 /*
  * The ArrayList is just like vector in C++.
@@ -56,6 +55,35 @@ class ArrayList
 					array->remove(pos);
 					pos=-1;
 					}
+			};
+
+		class constIterator
+			{
+			private:
+				const ArrayList<T> *array;
+				int pos;
+			public:
+				constIterator(const ArrayList<T> *array,int pos=-1):array(array),pos(pos) {}
+				
+				/*
+				 * Returns true if the iteration has more elements. 
+				 */
+				bool hasNext()
+					{
+					return pos<array->size()-1;
+					}
+				
+				/*
+				 * Returns the next element in the iteration. 
+				 * Exception : ElementNotExist
+				 */
+				const T& next()
+					{
+					if(!hasNext()) throw ElementNotExist();
+					pos++;
+					return array->get(pos);
+					}
+				
 			};
 		
 		/*
