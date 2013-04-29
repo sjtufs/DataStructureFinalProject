@@ -95,11 +95,10 @@ class LinkedList
 		class constIterator
 			{
 			private:
-				LinkedList<T> *list;
 				Node *pos;
 			public:
 				constIterator():pos(NULL) {}
-				constIterator(Node *pos,LinkedList<T> *list):pos(pos),list(list) {}
+				constIterator(Node *pos):pos(pos) {}
 
 				/*
 				 * Returns true if the iteration has more elements. 
