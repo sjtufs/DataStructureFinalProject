@@ -277,7 +277,7 @@ class LinkedList
 		 * Removes the element at the specified position in this list. 
 		 * The index is zero-based, with range [0, size).
 		 */
-		void remove(int index)
+		void removeIndex(int index)
 			{
 			if(index>=size||index<0) throw IndexOutOfBound();
 			Node *tmp=head;

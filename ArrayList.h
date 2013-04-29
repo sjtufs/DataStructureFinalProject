@@ -52,7 +52,7 @@ class ArrayList
 				void remove()
 					{
 					if(pos>=array->size||pos==-1) throw ElementNotExist();
-					array->remove(pos);
+					array->removeIndex(pos);
 					pos=-1;
 					}
 			};
@@ -207,7 +207,7 @@ class ArrayList
 		 * with range [0, size). 
 		 * Exception : IndexOutOfBound
 		 */
-		void remove(int index)
+		void removeIndex(int index)
 			{
 			if(index>=size||index<0) throw IndexOutOfBound();
 			delete data[index];
@@ -223,7 +223,7 @@ class ArrayList
 			{
 			int index=getIndex(element);
 			if(index==-1) return false;
-			remove(index);
+			removeIndex(index);
 			return true;
 			}
 		
