@@ -17,16 +17,23 @@ class TreeMap
 			Node *left,*right,*father;
 			Entry<K,V> data;
 			int nowSize,nowHeight;
+
 			Node():data(K(),V()) {nowSize=nowHeight=0;}
 			Node(const Entry<K,V> &data):data(data) {nowSize=nowHeight=0;}
-		
+			
+			/*
+			 * Update the size and height of the subtree
+			 */
 			void update(Node *t)
 				{
 				if(t==emptyNode) t->nowSize=t->nowHeight=0;
 				else t->nowSize=t->left->nowSize+t->right->nowSize+1,
 					 t->nowHeight=max(t->left->nowHeight,t->right->nowHeight)+1;
 				}
-
+			
+			/*
+			 * left-rotate for avl-tree / rb-tree / splay
+			 */
 			Node* leftRotate(Node *t)
 				{
 				Node *f=t->father;
@@ -45,6 +52,9 @@ class TreeMap
 				update(tmp);
 				}
 
+			/*
+			 * right-rotate for avl-tree / rb-tree / splay
+			 */
 			Node* righRotate(Node *t)
 				{
 				Node *f=t->father;
@@ -63,6 +73,9 @@ class TreeMap
 				update(tmp);
 				}
 			
+			/*
+			 * Returns the pointer of the Node with specified key.
+			 */
 			Node* findKey(const K &key) const
 				{
 				Node *t=root;
@@ -74,6 +87,9 @@ class TreeMap
 					}
 				}
 
+			/*
+			 * Returns the pointer of ther Node with spcified value.
+			 */
 			Node* findValue(Node *t,const V &value) const
 				{
 				if(t==emptyNode) return false;
@@ -83,10 +99,16 @@ class TreeMap
 				return false;
 				}
 			
+			/*
+			 * Deletes the Node with a specified key.
+			 */
 			Node* erase(Node *t,const K &key)
 				{
 				}
 
+			/*
+			 * Deletes all Nodes in the subtree
+			 */
 			Node* removeAll(Node *t)
 				{
 				if(t==emptyNode) return emptyNode;
@@ -234,13 +256,19 @@ class TreeMap
 			emptyNode=new Node();
 			root=emptyNode->father=emptyNode->left=emptyNode->right=emptyNode;
 			}
-
+		
+		/*
+		 * Destructor
+		 */
 		~TreeMap()
 			{
 			clear();
 			delete emptyNode;
 			}
 
+		/*
+		 * Assignment operator
+		 */
 		TreeMap& operator=(const TreeMap &x)
 			{
 			clear();
@@ -251,7 +279,10 @@ class TreeMap
 				put(element.key,element.value);
 				}
 			}
-
+		
+		/*
+		 * Copy-constructor
+		 */
 		TreeMap(const TreeMap &x)
 			{
 			emptyNode=new Node();
@@ -263,14 +294,20 @@ class TreeMap
 				put(element.key,element.value);
 				}
 			}
-
-		Iterator oterator()
+			
+		/*
+		 * Returns an iterator over the elements in this map. 
+		 */
+		Iterator iterator() const
 			{
 			Node *tmp=root;
 			while(tmp->left!=emptyNode) tmp=tmp->left;
 			return Iterator(tmp,emptyNode,this);
 			}
-
+		
+		/*
+		 * Returns a const iterator over the elements in this map. 
+		 */
 		constIterator ConstIterator() const
 			{
 			Node *tmp=root;
@@ -278,40 +315,65 @@ class TreeMap
 			return constIterator(tmp,emptyNode);
 			}
 		
+		/*
+		 * Removes all of the mappings from this map. 
+		 */
 		void clear()
 			{
 			root=removeAll(root);
 			delete emptyNode;
 			}
 		
+		/*
+		 * Returns true if this map contains a mapping for the specified key. 
+		 */
 		bool containsKey(const K &key) const
 			{
 			return findKey(key)!=emptyNode;
 			}
 
+		/*
+		 * Returns true if this map maps one or more keys to the specified value. 
+		 */
 		bool containsValue(const V &value) const
 			{
 			return findValue(value);
 			}
 		
+		/*
+		 * Returns a const reference to the value to which the specified key is mapped. 
+		 * If the key is not present in this map, this function should throw ElementNotExist exception.
+		 * Exceptions : ElementNotExist	
+		 */
 		const V &get(const K &key) const
 			{
 			Node *tmp=findKey(key);
 			if(tmp==emptyNode) throw ElementNotExist();
 			return tmp->data.value;
 			}
-
+		
+		/*
+		 * Returns true if this map contains no key-value mappings. 
+		 */
 		bool isEmpty() const
 			{
 			return root==emptyNode;
 			}
 
+		/*
+		 * Associates the specified value with the specified key in this map. 
+		 */
 		void put(const K &key,const V &value) 
 			{
 			Entry<K,V> tmp(key,value);
 			root=insert(root,tmp);
 			}
 
+		/*
+		 * Removes the mapping for the specified key from this map if present.
+		 * If there is no mapping for the specified key, throws ElementNotExist exception.
+		 *Exceptions : ElementNotExist	
+		 */
 		void remove(const K &key)
 			{
 			int oldSize=root->nowSize;
@@ -319,6 +381,9 @@ class TreeMap
 			if(root->nowSize==oldSize) throw ElementNotExist();
 			}
 
+		/*
+		 * Returns the number of key-value mappings in this map. 
+		 */
 		int size() const
 			{
 			return root->nowSize;
