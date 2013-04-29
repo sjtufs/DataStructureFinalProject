@@ -75,7 +75,7 @@ class LinkedList
 				/*
 				 * Returns the next element in the iteration. 
 				 */
-				T& next()
+				const T& next()
 					{
 					if(pos==NULL||pos->next==NULL) throw ElementNotExist();
 					pos=pos->next;
@@ -95,6 +95,36 @@ class LinkedList
 					delete pos;
 					pos=NULL;
 					list->nowSize--;
+					}
+			};
+		
+
+		class constIterator
+			{
+			private:
+				LinkedList<T> *list;
+				Node *pos;
+			public:
+				constIterator():pos(NULL) {}
+				constIterator(Node *pos,LinkedList<T> *list):pos(pos),list(list) {}
+
+				/*
+				 * Returns true if the iteration has more elements. 
+				 */
+				bool hasNext()
+					{
+					if(pos==NULL||pos->next==NULL) return false;
+					return true;
+					}
+
+				/*
+				 * Returns the next element in the iteration. 
+				 */
+				const T& next()
+					{
+					if(pos==NULL||pos->next==NULL) throw ElementNotExist();
+					pos=pos->next;
+					return *(pos->data);
 					}
 			};
 
