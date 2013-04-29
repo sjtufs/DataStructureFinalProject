@@ -8,7 +8,7 @@ class IndexOutOfBound
 	{
 	public:
 		IndexOutOfBound() {}
-		IndexOutOfBound(std::string msg):msg(msg) {}
+		IndexOutOfBound(std::string msg="Error: Index out of bound!"):msg(msg) {}
 		std::string getMessage() const {return msg;}
 	private:
 		std::string msg;
@@ -18,7 +18,7 @@ class ElementNotExist
 	{
 	public: 
 		ElementNotExist() {}
-		ElementNotExist(std::string msg):msg(msg) {}
+		ElementNotExist(std::string msg="Error: Element not exist!"):msg(msg) {}
 		std::string getMessage() const {return msg;}
 	private:
 		std::string msg;
