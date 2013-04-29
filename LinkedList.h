@@ -353,6 +353,14 @@ class LinkedList
 			{
 			return Iterator(head,this);
 			}
+
+		/*
+		 * Returns a const iterator over the elements in this list.
+		 */
+		constIterator ConstIterator() const
+			{
+			return constIterator(head);
+			}
 	
 	};
 

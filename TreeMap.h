@@ -21,7 +21,7 @@ class TreeMap
 			Node(const Entry<K,V> &data):data(data) {nowSize=nowHeight=0;}
 			};
 		
-		Node *root,*none;
+		Node *root,*emptyNode;
 
 	public:
 		class Iterator
@@ -149,6 +149,18 @@ class TreeMap
 					throw ElementNotExist();
 					}
 			};
+		/*
+		 * Constructs an empty map
+		 */
+		TreeMap()
+			{
+			emptyNode=new Node();
+			emptyNode->father=emptyNode->left=emptyNode->right=NULL;
+			root=emptyNode;
+			}
+
+
+	
 	};
 
 #endif

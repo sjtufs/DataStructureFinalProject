@@ -195,6 +195,14 @@ class ArrayList
 			}
 		
 		/*
+		 * Returns a const iterator over the elements in this list.
+		 */
+		constIterator ConstIterator() const
+			{
+			return constIterator(this,-1);
+			}
+
+		/*
 		 * Removes the element at the specified position in this list. The index is zero-based, 
 		 * with range [0, size). 
 		 * Exception : IndexOutOfBound

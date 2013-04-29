@@ -37,7 +37,7 @@ class Entry
 template<class T1,class T2>
 void appendALL(T1 &v1,const T2 &v2)
 	{
-	typename T2::constIterator tmp=v2.constIterator();
+	typename T2::constIterator tmp=v2.ConstIterator();
 	while(tmp.hasNext()) v1.add(tmp.next());
 	}
 #endif
