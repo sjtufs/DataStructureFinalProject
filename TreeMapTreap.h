@@ -1,4 +1,3 @@
-
 /** @file */
 #ifndef __TREEMAP_H
 #define __TREEMAP_H
@@ -379,7 +378,7 @@ public:
      */
     bool containsValue(const V& value) const 
 		{
-			return findvalue(root, value);
+		return findvalue(root, value);
 		}
 
     /**
@@ -447,17 +446,11 @@ public:
      * default-constructor.
      * O(logn).
      */
-    V put(const K& key, const V& value) {
-		/*Node *cur = find(key);
-		if (cur != null) {
-			V ret = cur->data.value;
-			cur->data.value = value;
-			return ret;
-		} else {*/
-		Entry<K, V> p(key, value);
-		insert(root, p);
-		return p.value;
-		/*}*/
+    V put(const K& key, const V& value) 
+    	{
+	Entry<K, V> p(key, value);
+	insert(root, p);
+	return p.value;
 	}
 
     /**
@@ -465,17 +458,20 @@ public:
      * O(logn).
      * @throw ElementNotExist
      */
-    V remove(const K& key) {
-		V ret;
-		int pre = nowSize;
-		root = erase(root, key);
-		if (pre == nowSize) throw ElementNotExist();
-		return ret;
+    V remove(const K& key)
+    	{
+	V ret;
+	int pre = nowSize;
+	root = erase(root, key);
+	if (pre == nowSize) throw ElementNotExist();
+	return ret;
 	}
 
     int size() const {return nowSize;}
 
-	bool isEmpty() const {nowSize==0;}
+    bool isEmpty() const {nowSize==0;}
+    
+    Node* getNode() const {return root;}
 };
 
 #endif
