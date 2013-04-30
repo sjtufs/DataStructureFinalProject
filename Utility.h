@@ -4,10 +4,9 @@
 #ifndef __UTILITY_H
 #define __UTILITY_H
 
-class IndexOutOfBound 
+class IndexOutOfBound
 	{
 	public:
-		IndexOutOfBound() {}
 		IndexOutOfBound(std::string msg="Error: Index out of bound!"):msg(msg) {}
 		std::string getMessage() const {return msg;}
 	private:
@@ -16,15 +15,14 @@ class IndexOutOfBound
 
 class ElementNotExist
 	{
-	public: 
-		ElementNotExist() {}
+	public:
 		ElementNotExist(std::string msg="Error: Element not exist!"):msg(msg) {}
 		std::string getMessage() const {return msg;}
 	private:
 		std::string msg;
 	};
 
-template<class K,class V> 
+template<class K,class V>
 class Entry
 	{
 	public:
