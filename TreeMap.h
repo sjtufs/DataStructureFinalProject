@@ -175,9 +175,12 @@ class TreeMap
                 bool visited;
 
             public:
+				constIterator(Node *pos=NULL,Node *emptyNode=NULL)
+                    :pos(pos),emptyNode(emptyNode) {visited=false;}
+
                 /*
-                * Returns true ifthe iteration has more elements..
-                */
+                 * Returns true if the iteration has more elements.
+			  	 */
                 bool hasNext()
                     {
                     if(pos==emptyNode||pos==NULL) return false;
@@ -192,8 +195,8 @@ class TreeMap
                     }
 
                 /*
-                 * Returns a const reference to the next element in the iteration.
-                 * @throw ElementNotExist
+                 * Returns the next element in the iteration.
+				 * @throw ElementNotExist exception when hasNext() == false
                  */
                 const Entry<K,V>& next()
                     {
@@ -217,9 +220,6 @@ class TreeMap
                     }
                     throw ElementNotExist();
                     }
-
-                constIterator(Node *pos=NULL,Node *emptyNode=NULL)
-                    :pos(pos),emptyNode(emptyNode) {visited=false;}
             };
 
         class Iterator
@@ -230,6 +230,9 @@ class TreeMap
                 TreeMap<K,V> *t;
 
             public:
+				Iterator(Node *pos=NULL,Node *emptyNode=NULL,TreeMap<K,V> *t=NULL)
+					: pos(pos),emptyNode(emptyNode),t(t) {visited=false;}
+
                 /*
                  * Returns true ifthe iteration has more elements.
                  */
@@ -245,10 +248,10 @@ class TreeMap
                 }
 
                 /*
-                 * Returns a reference to the next element in the iteration.
-                 * @throw ElementNotExist
+                 * Returns the next element in the iteration.
+                 * @throw ElementNotExist exception when hasNext()==false
                  */
-                Entry<K,V>& next() {
+                const Entry<K,V>& next() {
                     if(pos==emptyNode||pos==NULL) throw ElementNotExist();
                     if(!visited) {
                         visited=true;
@@ -268,8 +271,7 @@ class TreeMap
                 }
 
                 /*
-                 * Removes from the underlying collection the last element
-                 * returned by the iterator
+                 * Removes from the underlying collection the last element returned by the iterator
                  * @throw ElementNotExist
                  */
                 void remove() {
@@ -278,9 +280,6 @@ class TreeMap
                     t->remove(pos->key);
                     pos=emptyNode;
                 }
-
-                Iterator(Node *pos=NULL,Node *emptyNode=NULL,TreeMap<K,V> *t=NULL)
-                    : pos(pos),emptyNode(emptyNode),t(t) {visited=false;}
             };
 
         /*
@@ -293,8 +292,31 @@ class TreeMap
             root=emptyNode;
             }
 
-        /*
-         * Copy constructor
+		/*
+         * Destructor
+         */
+        ~TreeMap()
+            {
+            clear();
+            delete emptyNode;
+            }
+
+	/*
+		* Assignment operator
+		*/
+	   TreeMap& operator=(const TreeMap &x)
+		   {
+		   clear();
+		   typename TreeMap<K,V>::constIterator it=x.ConstIterator();
+		   while (it->hasNext())
+			   {
+			   Entry<K,V> tmp=it->next();
+			   put(tmp.key,tmp.value);
+			   }
+		   }
+
+		/*
+         * Copy-constructor
          */
         TreeMap(const TreeMap &x)
             {
@@ -310,33 +332,11 @@ class TreeMap
             }
 
         /*
-         * Destructor
-         */
-        ~TreeMap()
-            {
-            clear();
-            delete emptyNode;
-            }
-
-        /*
-         * Assignment operator
-         */
-        TreeMap& operator=(const TreeMap &x)
-            {
-            clear();
-            typename TreeMap<K,V>::constIterator it=x.ConstIterator();
-            while (it->hasNext())
-                {
-                Entry<K,V> tmp=it->next();
-                put(tmp.key,tmp.value);
-                }
-            }
-
-        /*
          * Constructs a new tree map containing the same mappings as the
          * given map
          */
-        template <class T2> TreeMap(const T2 &x)
+        template <class T2>
+		TreeMap(const T2 &x)
             {
             emptyNode=new Node();
             emptyNode->father=emptyNode->left=emptyNode->right=emptyNode;
@@ -351,9 +351,8 @@ class TreeMap
 
         /*
          * Returns an iterator over the elements in this map.
-         * O(1).
          */
-        Iterator iterator()
+        Iterator iterator() const
             {
             Node *pos=root;
             while (pos->left!=emptyNode) pos=pos->left;
@@ -362,7 +361,6 @@ class TreeMap
 
         /*
          * Returns an const iterator over the elements in this map.
-         * O(1).
          */
         constIterator ConstIterator() const
             {
@@ -373,7 +371,6 @@ class TreeMap
 
         /*
          * Removes all of the mappings from this map.
-         * O(n).
          */
         void clear()
             {
@@ -398,43 +395,7 @@ class TreeMap
             return findValue(root,value);
             }
 
-        /*
-         * Returns a key-value mapping associated with the least key in
-         * this map.
-         * O(logn).
-         * @throw ElementNotExist
-         */
-        const Entry<K,V>& firstEntry() const
-            {
-            if(root==emptyNode) throw ElementNotExist();
-            Node *n=root;
-            while (n->left!=emptyNode) n=n->left;
-            return n->data;
-            }
-
-        /*
-         * Returns the first (lowest) key nrently in this map.
-         * O(logn).
-         * @throw ElementNotExist
-         */
-        const K& firstKey() const
-            {
-            return firstEntry().key;
-            }
-
-        /*
-         * Returns a reference to the value which the specified key is mapped
-         * O(logn).
-         * @throw ElementNotExist
-         */
-        V& get(const K &key)
-            {
-            Node *n=findKey(key);
-            if(n==emptyNode) throw ElementNotExist();
-            return n->data.value;
-            }
-
-        /*
+		/*
          * Returns a reference to the value which the specified key is mapped
          * O(logn).
          * @throw ElementNotExist
@@ -446,34 +407,14 @@ class TreeMap
             return n->data.value;
             }
 
-        /*
-         * Returns a key-value mapping associated with the greatest key
-         * in this map.
-         * O(logn).
-         * @throw ElementNotExist
-         */
-        const Entry<K,V>& lastEntry() const
-            {
-            Node *n=root;
-            while (n->right!=emptyNode) n=n->right;
-            return n->data;
-            }
+		/*
+		 * Returns true if this map contains no key-value mappings.
+		 */
+		bool isEmpty() const {return root==emptyNode;}
 
-        /*
-         * Returns the last (highest) key nrently in this map.
-         * O(logn).
-         * @throw ElementNotExist
-         */
-        const K& lastKey() const
-            {
-            return lastEntry().key;
-            }
-
-        /*
+		/*
          * Associates the specified value with the specified key in this map.
-         * Returns the previous value,ifnot exist,a value returned by the
-         * default-constructor.
-         * O(logn).
+         * Returns the previous value,ifnot exist,a value returned by the default-constructor.
          */
         V put(const K& key,const V &value)
             {
@@ -482,9 +423,9 @@ class TreeMap
             return p.value;
             }
 
-        /*
-         * Removes the mapping for this key from this TreeMap ifpresent.
-         * O(logn).
+		/*
+         * Removes the mapping for this key from this TreeMap if present.
+		 * If there is no mapping for the specified key, throws ElementNotExist exception.
          * @throw ElementNotExist
          */
         V remove(const K &key)
@@ -496,13 +437,10 @@ class TreeMap
             return ret;
             }
 
-        /*
+		/*
          * Returns the number of key-value mappings in this map.
-         * O(logn).
          */
         int size() const {return root->nowSize;}
-
-        bool isEmpty() const {return root==emptyNode;}
     };
 
 #endif
