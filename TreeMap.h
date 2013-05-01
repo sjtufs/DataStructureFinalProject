@@ -96,15 +96,13 @@ class TreeMap
                 {
                 n->left=insert(n->left,e);
                 n->left->father=n;
-				if(n->left->left->nowSize>n->right->nowSize)
-					n=rightrotate(n);
+				if(n->left->left->aux>n->aux) n=rightrotate(n);
                 }
             else if(e.key>n->data.key)
                 {
                 n->right=insert(n->right,e);
                 n->right->father=n;
-				if(n->right->right->nowSize>n->left->nowSize)
-					n=leftrotate(n);
+				if(n->right->right->aux>n->aux) n=leftrotate(n);
                 }
             else if(e.key==n->data.key)
                 {
@@ -131,7 +129,7 @@ class TreeMap
                 }
             else
                 {
-                if(n->left->nowSize<n->right->nowSize) n=leftrotate(n);
+                if(n->left->aux<n->right->aux) n=leftrotate(n);
                 else n=rightrotate(n);
                 n=erase(n,key,value);
                 }
@@ -178,8 +176,7 @@ class TreeMap
 
             public:
                 /*
-                * Returns true ifthe iteration has more elements.
-                * Amortized O(1).
+                * Returns true ifthe iteration has more elements..
                 */
                 bool hasNext()
                     {
@@ -196,7 +193,6 @@ class TreeMap
 
                 /*
                  * Returns a const reference to the next element in the iteration.
-                 * Amortized O(1).
                  * @throw ElementNotExist
                  */
                 const Entry<K,V>& next()
@@ -236,7 +232,6 @@ class TreeMap
             public:
                 /*
                  * Returns true ifthe iteration has more elements.
-                 * Amortized O(1).
                  */
                 bool hasNext() {
                     if(pos==emptyNode||pos==NULL) return false;
@@ -251,7 +246,6 @@ class TreeMap
 
                 /*
                  * Returns a reference to the next element in the iteration.
-                 * Amortized O(1).
                  * @throw ElementNotExist
                  */
                 Entry<K,V>& next() {
@@ -276,7 +270,6 @@ class TreeMap
                 /*
                  * Removes from the underlying collection the last element
                  * returned by the iterator
-                 * Amortized O(1).
                  * @throw ElementNotExist
                  */
                 void remove() {
