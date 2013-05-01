@@ -4,7 +4,7 @@
 #include "Utility.h"
 #include <memory.h>
 
-/*
+/**
  * A linked list.
  *
  * The iterator iterates in the order of the elements being loaded into this list.
@@ -43,7 +43,7 @@ template <class T> class LinkedList
                 Node *position;
                 LinkedList<T> *host;
             public:
-                /*
+                /**
                  * Returns true if the iteration has more elements.
                  */
                 bool hasNext()
@@ -52,7 +52,7 @@ template <class T> class LinkedList
                     return position->next!=NULL;
                     }
 
-				/*
+				/**
 			 	 * Returns the next element in the iteration.
 				 * @throw ElementNotExist exception when hasNext() == false
 				 */
@@ -63,7 +63,7 @@ template <class T> class LinkedList
                     return *(position->data);
                     }
 
-				/*
+				/**
 				 * TODO Removes from the underlying collection the last element
 				 * returned by the iterator
 				 * The behavior of an iterator is unspecified if the underlying
@@ -93,7 +93,7 @@ template <class T> class LinkedList
                 Iterator(Node *position,LinkedList <T> *host):position(position),host(host) {}
             };
 
-        /*
+        /**
          * Constructs an empty list
          */
         LinkedList()
@@ -103,7 +103,7 @@ template <class T> class LinkedList
             nowSize=0;
             }
 
-        /*
+        /**
          * Copy constructor
          */
         LinkedList(const LinkedList<T> &x)
@@ -114,7 +114,7 @@ template <class T> class LinkedList
             addAll(*this,x);
             }
 
-        /*
+        /**
          * Assignment operator
          */
         LinkedList<T>& operator=(const LinkedList<T> &x)
@@ -124,7 +124,7 @@ template <class T> class LinkedList
             return *this;
             }
 
-        /*
+        /**
          * Desturctor
          */
         ~LinkedList()
@@ -133,7 +133,7 @@ template <class T> class LinkedList
             delete head;
             }
 
-		/*
+		/**
          * Appends the specified element to the end of this list.
          * Always returns true;
          */
@@ -145,7 +145,7 @@ template <class T> class LinkedList
             return true;
             }
 
-		/*
+		/**
          * Inserts the specified element at the beginning of this list.
          */
         void addFirst(const T &e)
@@ -155,7 +155,7 @@ template <class T> class LinkedList
             nowSize++;
             }
 
-		/*
+		/**
 		 * Insert the specified element to the end of this list.
 		 * Equivalent to add.
 		 */
@@ -164,7 +164,7 @@ template <class T> class LinkedList
 			add(e);
 			}
 
-		/*
+		/**
 		 * Inserts the specified element to the specified position in this list.
 		 * The range of index parameter is [0, size], where index=0 means inserting to the head,
 		 * and index=size means appending to the end.
@@ -180,7 +180,7 @@ template <class T> class LinkedList
             nowSize++;
             }
 
-        /*
+        /**
          * Removes all of the elements from this list.
          */
         void clear()
@@ -194,7 +194,7 @@ template <class T> class LinkedList
             tail=head;
             }
 
-        /*
+        /**
          * Returns true if this list contains the specified element.
          */
         bool contains(const T &e) const
@@ -208,7 +208,7 @@ template <class T> class LinkedList
             return false;
             }
 
-		/*
+		/**
 		 * Returns a const reference to the element at the specified position in this list.
 		 * The index is zero-based, with range [0, size).
 		 * @throw IndexOutOfBound
@@ -224,7 +224,7 @@ template <class T> class LinkedList
             return *(n->data);
             }
 
-        /*
+        /**
 		 * Returns a const reference to the first element.
 		 * @throw ElementNotExist
 		 */
@@ -234,7 +234,7 @@ template <class T> class LinkedList
             return *(head->next->data);
             }
 
-        /*
+        /**
          * Returns a const reference to the last element.
          * @throw ElementNotExist
          */
@@ -244,7 +244,7 @@ template <class T> class LinkedList
             return *(tail->data);
             }
 
-		/*
+		/**
          * Returns true if this list contains no elements.
          */
         bool isEmpty() const
@@ -252,7 +252,7 @@ template <class T> class LinkedList
             return (head==tail);
             }
 
-        /*
+        /**
          * Returns the index of the first ocnrence of the specified element
          * O(1).
          * in this list,or -1 if this list does not contain the element.
@@ -270,7 +270,7 @@ template <class T> class LinkedList
             return -1;
             }
 
-		/*
+		/**
 		 * Removes the element at the specified position in this list.
 		 * The index is zero-based, with range [0, size).
 		 * @throw IndexOutOfBound
@@ -284,7 +284,7 @@ template <class T> class LinkedList
             it.remove();
             }
 
-		/*
+		/**
 		 * Removes the first ocnrence of the specified element from this list, if it is present.
 		 * Returns true if it was present in the list, otherwise false.
 		 */
@@ -304,7 +304,7 @@ template <class T> class LinkedList
             return false;
             }
 
-		/*
+		/**
 		 * Removes the first element from  this list.
 		 * @throw ElementNotExist
 		 */
@@ -315,7 +315,7 @@ template <class T> class LinkedList
 			T r=del.next();
 			del.remove();
 			}
-		/*
+		/**
          * Removes the last element from this list.
          * @throw ElementNotExist
          */
@@ -326,7 +326,7 @@ template <class T> class LinkedList
             n.remove();
             }
 
-		/*
+		/**
 		 * Replaces the element at the specified position in this list with the specified element.
 		 * The index is zero-based, with range [0, size).
 		 * @throw IndexOutOfBound
@@ -342,12 +342,12 @@ template <class T> class LinkedList
             *(n->data)=e;
             }
 
-		/*
+		/**
          * Returns the number of elements in this list.
          */
         int size() const {return nowSize;}
 
-		/*
+		/**
          * Returns an iterator
          */
         Iterator iterator()

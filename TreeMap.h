@@ -212,7 +212,7 @@ class TreeMap
                 bool visited;
                 TreeMap<K,V> *s;
             public:
-                /*
+                /**
                  * Returns true if the iteration has more elements.
                  */
                 bool hasNext()
@@ -228,7 +228,7 @@ class TreeMap
                     return false;
                     }
 
-                /*
+                /**
                  * Returns the next element in the iteration.
                  * @throw ElementNotExist exception when hasNext()==false
                  */
@@ -255,7 +255,7 @@ class TreeMap
                     throw ElementNotExist();
                 }
 
-                /*
+                /**
                  * Removes from the underlying collection the last element returned by the iterator
                  * @throw ElementNotExist
                  */
@@ -271,7 +271,7 @@ class TreeMap
                     : p(p),emptyNode(emptyNode),s(s) {visited=false;}
             };
 
-        /*
+        /**
          * Constructs an empty map
          */
         TreeMap()
@@ -281,7 +281,7 @@ class TreeMap
             root=emptyNode;
             }
 
-		/*
+		/**
          * Destructor
          */
         ~TreeMap()
@@ -290,7 +290,7 @@ class TreeMap
             delete emptyNode;
             }
 
-		/*
+		/**
          * Assignment operator
          */
         TreeMap& operator=(const TreeMap &m)
@@ -304,7 +304,7 @@ class TreeMap
                 }
             }
 
-		/*
+		/**
          * Copy-constructor
          */
         TreeMap(const TreeMap &c)
@@ -320,7 +320,7 @@ class TreeMap
                 }
             }
 
-		/*
+		/**
          * Returns an iterator over the elements in this map.
          */
         Iterator iterator()
@@ -330,7 +330,7 @@ class TreeMap
             return Iterator(n,emptyNode,this);
             }
 
-		/*
+		/**
          * Removes all of the mappings from this map.
          */
         void clear()
@@ -338,7 +338,7 @@ class TreeMap
             root=eraseAll(root);
             }
 
-		/*
+		/**
          * Returns true if this map contains a mapping forthe specified key.
          */
         bool containsKey(const K &key) const
@@ -346,7 +346,7 @@ class TreeMap
             return find(key)!=emptyNode;
             }
 
-        /*
+        /**
          * Returns true if this map contains a mapping forthe specified value.
          */
         bool containsValue(const V &value) const
@@ -354,7 +354,7 @@ class TreeMap
             return findvalue(root,value);
             }
 
-		/*
+		/**
 		 * TODO Returns a const reference to the value to which the specified key is mapped.
 		 * If the key is not present in this map, this function should throw ElementNotExist exception.
 		 * @throw ElementNotExist
@@ -366,12 +366,12 @@ class TreeMap
             return n->data.value;
             }
 
-		/*
+		/**
 		 * Returns true if this map contains no key-value mappings.
 		 */
 		bool isEmpty() const {return root==emptyNode;}
 
-		/*
+		/**
          * Associates the specified value with the specified key in this map.
          */
         void put(const K &key,const V &value)
@@ -380,7 +380,7 @@ class TreeMap
             root=insert(root,tmp);
             }
 
-		/*
+		/**
 		 * Removes the mapping forthe specified key from this map ifpresent.
 		 * If there is no mapping forthe specified key, throws ElementNotExist exception.
 		 * @throw ElementNotExist
@@ -393,7 +393,7 @@ class TreeMap
             if(pre==root->nowSize) throw ElementNotExist();
             }
 
-		/*
+		/**
          * Returns the number of key-value mappings in this map.
          */
         int size() const {return root->nowSize;}

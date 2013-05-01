@@ -1,42 +1,62 @@
-
 #include <string>
 
 #ifndef __UTILITY_H
 #define __UTILITY_H
 
-class IndexOutOfBound
-	{
-	public:
-		IndexOutOfBound(std::string msg="Error: Index out of bound!"):msg(msg) {}
-		std::string getMessage() const {return msg;}
-	private:
-		std::string msg;
-	};
+/**
+ * Adds all elements of container b into container a
+ */
+template<class T1,class T2>
+inline void addAll(T1 &a,const T2 &b)
+    {
+    typename T2::ConstIterator it=b.constIterator();
+    while (it.hasNext())
+        {
+        a.add(it.next());
+        }
+    }
 
-class ElementNotExist
-	{
-	public:
-		ElementNotExist(std::string msg="Error: Element not exist!"):msg(msg) {}
-		std::string getMessage() const {return msg;}
-	private:
-		std::string msg;
-	};
+/**
+ * Throws when an index is out of range
+ */
+class IndexOutOfBound {
+public:
+    IndexOutOfBound() {}
+    IndexOutOfBound(std::string msg):msg(msg) {}
+    std::string getMessage() const {return msg;}
+private:
+    std::string msg;
+};
 
-template<class K,class V>
+/**
+ * Throws when an required element does not exist
+ */
+class ElementNotExist {
+public: ElementNotExist() {}
+    ElementNotExist(std::string msg):msg(msg) {}
+    std::string getMessage() const {return msg;}
+private:
+    std::string msg;
+};
+
+/**
+ * Map.Entry,a key-value pair.
+ */
+template <class K,class V>
 class Entry
 	{
 	public:
-		const K key;
+		K key;
 		V value;
 
-		Entry(const K& key,const V &value):key(key),value(value) {}
-	};
+		/**
+		 * Constructor
+		 */
+		Entry(const K& k,const V& v):key(k),value(v) {}
 
-template<class T1,class T2>
-void appendALL(T1 &v1,const T2 &v2)
-	{
-	typename T2::constIterator tmp=v2.ConstIterator();
-	while(tmp.hasNext()) v1.add(tmp.next());
-	}
+		K getKey() const {return key;}
+
+		V getValue() const {return value;}
+};
 #endif
 
