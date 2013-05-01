@@ -1,14 +1,11 @@
-/* @file */
 #ifndef __TREEMAP_H
 #define __TREEMAP_H
 
 #include "Utility.h"
-#include<stdlib.h>
-#include<time.h>
 
-/*
+/**
  * A map is a sequence of (key,value) entries that provides fast retrieval
- * based on the key. At most one value is held for each key.
+ * based on the key. At most one value is held foreach key.
  *
  * TreeMap is the balanced-tree implementation of map. The iterators must
  * iterate through the map in the natural order (operator<) of the key.
@@ -17,35 +14,24 @@ template<class K,class V>
 class TreeMap
     {
     private:
-    static const int mod=1000000000;
         struct Node
             {
             Node *left,*right,*father;
             Entry<K,V> data;
-            int nowSize,aux;
-            Node():data(K(),V())
-                {
-                nowSize=0;
-                srand(time(NULL));
-                aux=rand()%mod;
-                }
-            Node(const Entry<K,V>& data):data(data)
-                {
-                nowSize=0;
-                srand(time(NULL));
-                aux=rand()%mod;
-                }
+            int nowSize;
+            Node ():data(K(),V()) {nowSize=0;}
+            Node(const Entry<K,V>& data):data(data) {nowSize=0;}
             };
 
         Node *root,*emptyNode;
 
-        void update(Node *n)
+        void updateNode(Node *n)
             {
             if(n==emptyNode) n->nowSize=0;
-            else n->nowSize=n->left->nowSize+n->right->nowSize+1;
+            else n->nowSize=n->left->nowSize + n->right->nowSize + 1;
             }
 
-        Node* leftrotate(Node *n)
+        Node* leftRotate(Node *n)
             {
             Node *father=n->father;
             Node *tmp=n->right;
@@ -59,12 +45,12 @@ class TreeMap
             if(n->right!=emptyNode) n->right->father=n;
             tmp->left=n;
             n->father=tmp;
-            update(n);
-            update(tmp);
+            updateNode(n);
+            updateNode(tmp);
             return tmp;
             }
 
-        Node* rightrotate(Node *n)
+        Node* rightRotate(Node *n)
             {
             Node *father=n->father;
             Node *tmp=n->left;
@@ -78,50 +64,46 @@ class TreeMap
             if(n->left!=emptyNode) n->left->father=n;
             tmp->right=n;
             n->father=tmp;
-            update(n);
-            update(tmp);
+            updateNode(n);updateNode(tmp);
             return tmp;
             }
 
-        Node* insert(Node *n,Entry<K,V> &e)
+        Node* insert(Node *n,Entry<K,V> &data)
             {
-            if(n==emptyNode) {
-                n=new Node(e);
+            if(n==emptyNode)
+                {
+                n=new Node(data);
                 n->left=n->right=n->father=emptyNode;
                 n->nowSize=1;
-                n->aux=rand()%mod;
-                e.value=V();
-            }
-            else if(e.key<n->data.key)
+                }
+            else if(data.key < n->data.key)
                 {
-                n->left=insert(n->left,e);
+                n->left=insert(n->left,data);
                 n->left->father=n;
-				if(n->left->left->aux>n->aux) n=rightrotate(n);
+                if(n->left->left->nowSize>n->right->nowSize) n=rightRotate(n);
                 }
-            else if(e.key>n->data.key)
+            else if(data.key>n->data.key)
                 {
-                n->right=insert(n->right,e);
+                n->right=insert(n->right,data);
                 n->right->father=n;
-				if(n->right->right->aux>n->aux) n=leftrotate(n);
+                if(n->right->right->nowSize>n->left->nowSize) n=leftRotate(n);
                 }
-            else if(e.key==n->data.key)
+            else if(data.key==n->data.key)
                 {
-                V tmp=e.value;
-                e.value=n->data.value;
+                V tmp=data.value;
+                data.value=n->data.value;
                 n->data.value=tmp;
                 }
-		update(n);
-		return n;
-        }
+            updateNode(n);
+            return n;
+            }
 
         Node* erase(Node *n,const K &key,V &value)
             {
             if(n==emptyNode) return emptyNode;
-            if(key<n->data.key)
-                n->left=erase(n->left,key,value);
-            else if(key>n->data.key)
-                n->right=erase(n->right,key,value);
-            else if(n->left==emptyNode&&n->right==emptyNode)
+            if(key < n->data.key) n->left=erase(n->left,key,value);
+            else if(key>n->data.key) n->right=erase(n->right,key,value);
+            else if(n->left==emptyNode && n->right==emptyNode)
                 {
                 value=n->data.value;
                 delete n;
@@ -129,144 +111,147 @@ class TreeMap
                 }
             else
                 {
-                if(n->left->aux<n->right->aux) n=leftrotate(n);
-                else n=rightrotate(n);
+                if(n->left->nowSize < n->right->nowSize) n=leftRotate(n);
+                else n=rightRotate(n);
                 n=erase(n,key,value);
                 }
-            update(n);
+            updateNode(n);
             return n;
             }
 
-        Node* removeAll(Node *n)
+        Node* eraseAll(Node *n)
             {
             if(n==emptyNode) return emptyNode;
-            n->left=removeAll(n->left);
-            n->right=removeAll(n->right);
+            n->left=eraseAll(n->left);
+            n->right=eraseAll(n->right);
             delete n;
             return emptyNode;
             }
 
-        Node* findKey(const K &key) const
+        Node* find(const K &key) const
             {
             Node *n=root;
             while (n!=emptyNode)
                 {
                 if(n->data.key==key) return n;
-                else if(key<n->data.key) n=n->left;
+                else if(key < n->data.key) n=n->left;
                 else n=n->right;
                 }
             return n;
             }
 
-	bool findValue(Node *n,const V &value) const
-        {
-		if(n==emptyNode) return false;
-		if(n->data.value==value) return true;
-		if(findValue(n->left,value)) return true;
-		if(findValue(n->right,value)) return true;
-		return false;
-        }
+        bool findvalue(Node *n,const V &value) const
+            {
+            if(n==emptyNode) return false;
+            if(n->data.value==value) return true;
+            if(findvalue(n->left,value)) return true;
+            if(findvalue(n->right,value)) return true;
+            return false;
+            }
 
     public:
-        class constIterator
+        class ConstIterator
             {
             private:
-                Node *pos,*emptyNode;
+                Node *p,*emptyNode;
                 bool visited;
-
             public:
-				constIterator(Node *pos=NULL,Node *emptyNode=NULL)
-                    :pos(pos),emptyNode(emptyNode) {visited=false;}
-
-                /*
+                /**
                  * Returns true if the iteration has more elements.
-			  	 */
+                 * Amortized O(1).
+                 */
                 bool hasNext()
                     {
-                    if(pos==emptyNode||pos==NULL) return false;
-                    if(pos->right!=emptyNode||!visited) return true;
-                    Node *q=pos,*f=q->father;
-                    while (f!=emptyNode)
+                    if(p==emptyNode||p==NULL) return false;
+                    if(p->right!=emptyNode||visited==false) return true;
+                    Node *q=p,*x=q->father;
+                    while (x!=emptyNode)
                         {
-                        if(f->left==q) return true;
-                        else q=f,f=q->father;
+                        if(x->left==q) return true;
+                        else q=x,x=q->father;
                         }
                     return false;
                     }
 
-                /*
-                 * Returns the next element in the iteration.
-				 * @throw ElementNotExist exception when hasNext() == false
+                /**
+                 * Returns a const reference to the next element in the iteration.
+                 * Amortized O(1).
+                 * @throw ElementNotExist
                  */
                 const Entry<K,V>& next()
                     {
-                    if(pos==emptyNode||pos==NULL) throw ElementNotExist();
-                    if(!visited)
+                    if(p==NULL||p==emptyNode) throw ElementNotExist();
+                    if(visited==false)
                         {
                         visited=true;
-                        return pos->data;
-                    }
-                    if(pos->right!=emptyNode)
-                        {
-                        pos=pos->right;
-                        while (pos->left!=emptyNode) pos=pos->left;
-                        return pos->data;
+                        return p->data;
                         }
-                    Node *q=pos,*f=q->father;
-                    while (f!=emptyNode)
+                    if(p->right!=emptyNode)
                         {
-                        if(f->left==q) return (pos=f)->data;
-                        else q=f,f=q->father;
-                    }
+                        p=p->right;
+                        while (p->left!=emptyNode) p=p->left;
+                        return p->data;
+                        }
+                    Node *q=p,*x=q->father;
+                    while (x!=emptyNode)
+                        {
+                        if(x->left==q) return (p=x)->data;
+                        else q=x,x=q->father;
+                        }
                     throw ElementNotExist();
                     }
+
+                ConstIterator(Node *p=NULL,Node *emptyNode=NULL)
+                    : p(p),emptyNode(emptyNode) {visited=false;}
             };
 
         class Iterator
             {
             private:
-                Node *pos,*emptyNode;
+                Node *p,*emptyNode;
                 bool visited;
-                TreeMap<K,V> *t;
-
+                TreeMap<K,V> *s;
             public:
-				Iterator(Node *pos=NULL,Node *emptyNode=NULL,TreeMap<K,V> *t=NULL)
-					: pos(pos),emptyNode(emptyNode),t(t) {visited=false;}
-
                 /*
-                 * Returns true ifthe iteration has more elements.
+                 * Returns true if the iteration has more elements.
                  */
-                bool hasNext() {
-                    if(pos==emptyNode||pos==NULL) return false;
-                    if(pos->right!=emptyNode||!visited) return true;
-                    Node *q=pos,*f=q->father;
-                    while (f!=emptyNode) {
-                        if(f->left==q) return true;
-                        else q=f,f=q->father;
-                    }
+                bool hasNext()
+                    {
+                    if(p==emptyNode||p==NULL) return false;
+                    if(p->right!=emptyNode||visited==false) return true;
+                    Node *q=p,*x=q->father;
+                    while (x!=emptyNode)
+                        {
+                        if(x->left==q) return true;
+                        else q=x,x=q->father;
+                        }
                     return false;
-                }
+                    }
 
                 /*
                  * Returns the next element in the iteration.
                  * @throw ElementNotExist exception when hasNext()==false
                  */
-                const Entry<K,V>& next() {
-                    if(pos==emptyNode||pos==NULL) throw ElementNotExist();
-                    if(!visited) {
+                const Entry<K,V>& next()
+                    {
+                    if(p==emptyNode||p==NULL) throw ElementNotExist();
+                    if(visited==false)
+                        {
                         visited=true;
-                        return pos->data;
-                    }
-                    if(pos->right!=emptyNode) {
-                        pos=pos->right;
-                        while (pos->left!=emptyNode) pos=pos->left;
-                        return pos->data;
-                    }
-                    Node *q=pos,*f=q->father;
-                    while (f!=emptyNode) {
-                        if(f->left==q) return (pos=f)->data;
-                        else q=f,f=q->father;
-                    }
+                        return p->data;
+                        }
+                    if(p->right!=emptyNode)
+                        {
+                        p=p->right;
+                        while (p->left!=emptyNode) p=p->left;
+                        return p->data;
+                        }
+                    Node *q=p,*x=q->father;
+                    while (x!=emptyNode)
+                        {
+                        if(x->left==q) return (p=x)->data;
+                        else q=x,x=q->father;
+                        }
                     throw ElementNotExist();
                 }
 
@@ -274,12 +259,16 @@ class TreeMap
                  * Removes from the underlying collection the last element returned by the iterator
                  * @throw ElementNotExist
                  */
-                void remove() {
-                    if(pos==emptyNode||pos==NULL) throw ElementNotExist();
-                    if(!t->containsKey(pos->data->key)) throw ElementNotExist();
-                    t->remove(pos->key);
-                    pos=emptyNode;
-                }
+                void remove()
+                    {
+                    if(p==emptyNode||p==NULL) throw ElementNotExist();
+                    if(!s->containsKey(p->data->key)) throw ElementNotExist();
+                    s->remove(p->key);
+                    p=emptyNode;
+                    }
+
+                Iterator(Node *p=NULL,Node *emptyNode=NULL,TreeMap<K,V> *s=NULL)
+                    : p(p),emptyNode(emptyNode),s(s) {visited=false;}
             };
 
         /*
@@ -301,108 +290,78 @@ class TreeMap
             delete emptyNode;
             }
 
-	/*
-		* Assignment operator
-		*/
-	   TreeMap& operator=(const TreeMap &x)
-		   {
-		   clear();
-		   typename TreeMap<K,V>::constIterator it=x.ConstIterator();
-		   while (it->hasNext())
-			   {
-			   Entry<K,V> tmp=it->next();
-			   put(tmp.key,tmp.value);
-			   }
-		   }
+		/*
+         * Assignment operator
+         */
+        TreeMap& operator=(const TreeMap &m)
+            {
+            clear();
+            typename TreeMap<K,V>::ConstIterator it=m.constIterator();
+            while (it->hasNext())
+                {
+                Entry<K,V> tmp=it->next();
+                put(tmp.key,tmp.value);
+                }
+            }
 
 		/*
          * Copy-constructor
          */
-        TreeMap(const TreeMap &x)
+        TreeMap(const TreeMap &c)
             {
             emptyNode=new Node();
             emptyNode->father=emptyNode->left=emptyNode->right=emptyNode;
             root=emptyNode;
-            typename TreeMap<K,V>::constIterator it=x.ConstIterator();
+            typename TreeMap<K,V>::ConstIterator it=c.constIterator();
             while (it->hasNext())
                 {
-                Entry<K,V> tmp=it->next();
-                put(tmp.key,tmp.value);
+                Entry<K,V> d=it->next();
+                put(d.key,d.value);
                 }
             }
 
-        /*
-         * Constructs a new tree map containing the same mappings as the
-         * given map
-         */
-        template <class T2>
-		TreeMap(const T2 &x)
-            {
-            emptyNode=new Node();
-            emptyNode->father=emptyNode->left=emptyNode->right=emptyNode;
-            root=emptyNode;
-            typename T2::constIterator it=x.ConstIterator();
-            while (it->hasNext())
-                {
-                Entry<K,V> tmp=it->next();
-                put(tmp.key,tmp.value);
-                }
-            }
-
-        /*
+		/*
          * Returns an iterator over the elements in this map.
          */
-        Iterator iterator() const
+        Iterator iterator()
             {
-            Node *pos=root;
-            while (pos->left!=emptyNode) pos=pos->left;
-            return Iterator(pos,emptyNode,this);
+            Node *n=root;
+            while (n->left!=emptyNode) n=n->left;
+            return Iterator(n,emptyNode,this);
             }
 
-        /*
-         * Returns an const iterator over the elements in this map.
-         */
-        constIterator ConstIterator() const
-            {
-            Node *pos=root;
-            while (pos->left!=emptyNode) pos=pos->left;
-            return constIterator(pos,emptyNode);
-            }
-
-        /*
+		/*
          * Removes all of the mappings from this map.
          */
         void clear()
             {
-            root=removeAll(root);
-            }
-
-        /*
-         * Returns true ifthis map contains a mapping for the specified key.
-         * O(logn).
-         */
-        bool containsKey(const K &key) const
-            {
-            return findKey(key)!=emptyNode;
-            }
-
-        /*
-         * Returns true ifthis map contains a mapping for the specified value.
-         * O(n).
-         */
-        bool containsValue(const V &value) const
-            {
-            return findValue(root,value);
+            root=eraseAll(root);
             }
 
 		/*
-         * Returns a reference to the value which the specified key is mapped
-         * O(logn).
-         * @throw ElementNotExist
+         * Returns true if this map contains a mapping forthe specified key.
          */
+        bool containsKey(const K &key) const
+            {
+            return find(key)!=emptyNode;
+            }
+
+        /*
+         * Returns true if this map contains a mapping forthe specified value.
+         */
+        bool containsValue(const V &value) const
+            {
+            return findvalue(root,value);
+            }
+
+		/*
+		 * TODO Returns a const reference to the value to which the specified key is mapped.
+		 * If the key is not present in this map, this function should throw ElementNotExist exception.
+		 * @throw ElementNotExist
+		 */
         const V& get(const K &key) const
             {
-            Node *n=findKey(key);
+            Node *n=find(key);
             if(n==emptyNode) throw ElementNotExist();
             return n->data.value;
             }
@@ -414,27 +373,24 @@ class TreeMap
 
 		/*
          * Associates the specified value with the specified key in this map.
-         * Returns the previous value,ifnot exist,a value returned by the default-constructor.
          */
-        V put(const K& key,const V &value)
+        void put(const K &key,const V &value)
             {
-            Entry<K,V> p(key,value);
-            root=insert(root,p);
-            return p.value;
+            Entry<K,V> tmp(key,value);
+            root=insert(root,tmp);
             }
 
 		/*
-         * Removes the mapping for this key from this TreeMap if present.
-		 * If there is no mapping for the specified key, throws ElementNotExist exception.
-         * @throw ElementNotExist
-         */
-        V remove(const K &key)
+		 * Removes the mapping forthe specified key from this map ifpresent.
+		 * If there is no mapping forthe specified key, throws ElementNotExist exception.
+		 * @throw ElementNotExist
+		 */
+        void remove(const K &key)
             {
-            V ret;
+            V r;
             int pre=root->nowSize;
-            root=erase(root,key,ret);
+            root=erase(root,key,r);
             if(pre==root->nowSize) throw ElementNotExist();
-            return ret;
             }
 
 		/*
