@@ -18,11 +18,13 @@ class ArrayList
         int capacity,nowSize;
         T **data;
 
+    public:
         class Iterator
             {
             private:
                 ArrayList<T> *host;
                 int position;
+
             public:
                 /**
                 *Returns true if the iteration has more elements.
@@ -58,8 +60,7 @@ class ArrayList
                 Iterator(ArrayList <T> *host,int position=-1)
                     : host(host),position(position) {}
             };
-		
-	public:
+
         /**
          * Constructs an empty array list with an initial capacity of 1000.
          */
