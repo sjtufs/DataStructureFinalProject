@@ -323,7 +323,7 @@ class TreeMap
 		/**
          * Returns an iterator over the elements in this map.
          */
-        Iterator iterator()
+        Iterator iterator() const
             {
             Node *n=root;
             while (n->left!=emptyNode) n=n->left;
