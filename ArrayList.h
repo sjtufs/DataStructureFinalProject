@@ -58,7 +58,8 @@ class ArrayList
                 Iterator(ArrayList <T> *host,int position=-1)
                     : host(host),position(position) {}
             };
-
+		
+	public:
         /**
          * Constructs an empty array list with an initial capacity of 1000.
          */
