@@ -122,8 +122,8 @@ class HashMap
 					throw ElementNotExist();
 					}
 	
-				ConstIterator(int capacity=0,const LinkedList<Entry<K,V> > *list=NULL,const HashMap<K,V,H> *host=NULL)
-					:capacity(capacity),position(-1),list(list),it(list[0].constIterator(),host(host)) {}
+				Iterator(int capacity=0,const LinkedList<Entry<K,V> > *list=NULL,const HashMap<K,V,H> *host=NULL)
+					:capacity(capacity),position(-1),list(list),it(list[0].Iterator(),host(host)) {}
 				
 			};
 
