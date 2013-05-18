@@ -111,7 +111,7 @@ template <class T> class LinkedList
             head=tail=new Node();
             head->prev=head;
             nowSize=0;
-            addAll(*this,x);
+            //addAll(*this,x);
             }
 
         /**

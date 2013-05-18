@@ -37,7 +37,7 @@ class ArrayList
 				 * Returns the next element in the iteration.
 				 * @throw ElementNotExist exception when hasNext() == false
 				 */
-                T& next() {
+                const T& next() {
                     if (!hasNext()) throw ElementNotExist();
                     return host->get(++position);
                 }
@@ -160,7 +160,7 @@ class ArrayList
 		/**
          * Returns true if this list contains no elements.
          */
-        bool isTmpty() const {return nowSize==0;}
+        bool isEmpty() const {return nowSize==0;}
 
 		/**
 		 * Removes the element at the specified position in this list.
