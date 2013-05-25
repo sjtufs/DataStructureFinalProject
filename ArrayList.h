@@ -1,239 +1,174 @@
 #ifndef __ARRAYLIST_H
 #define __ARRAYLIST_H
+using namespace std;
 
-#include "Utility.h"
-#include <memory.h>
+#include "ElementNotExist.h"
+#include "IndexOutOfBound.h"
 
-/**
- * The ArrayList is just like vector in C++.
- * You should know that "capacity" here doesn't mean how many elements are now in this list,it means
- * the length of the host of your inner implemention
- * For example,even if the capacity is 10,the method "isTmpty()" may still return true.
- * The iterator iterates in the order of the elements being loaded into this list
- */
 template <class T>
 class ArrayList
-    {
-    private:
-        int capacity,nowSize;
-        T **data;
+{
+    T *_data;
+    int _size, _capacity;
+	
+	public:
+    class Iterator 
+	{
+        int _position;
+        ArrayList<T> *_host;
+    
+		public:
+        Iterator(ArrayList *x,int _p=-1):_host(x),_position(_p) {} 
+        
+		bool hasNext()
+		{
+            return (_position<_host->size()-1);
+        }
 
-    public:
-        class Iterator
-            {
-            private:
-                ArrayList<T> *host;
-                int position;
+        T& next()
+		{
+            if(!hasNext()) throw ElementNotExist();
+			return _host->get(++_position);
+        }
 
-            public:
-                /**
-                *Returns true if the iteration has more elements.
-                 */
-                bool hasNext() {
-                    return position<host->size()-1;
-                }
+        void remove()
+		{
+			if(_position==-1) throw ElementNotExist();
+            _host->removeIndex(_position);
+            --_position;
+        }
+	};
 
-				/**
-				 * Returns the next element in the iteration.
-				 * @throw ElementNotExist exception when hasNext() == false
-				 */
-                T& next() {
-                    if (!hasNext()) throw ElementNotExist();
-                    return host->get(++position);
-                }
+    ArrayList()
+	{
+        _capacity=10;
+        _size=0;
+		_data=new T[_capacity];
+    }
 
-                /**
-				 * Removes from the underlying collection the last element
-			     * returned by the iterator
-			     * The behavior of an iterator is unspecified if the underlying
-			     * collection is modified while the iteration is in progress in
-			     * any way other than by calling this method.
-			     * @throw ElementNotExist
-			     */
-				void remove()
-                    {
-                    if (position==-1||position>=host->size()) throw ElementNotExist();
-                    host->removeIndex(position);
-                    position=-1;
-                    }
+    ~ArrayList()
+	{
+        _capacity=0;
+        _size=0;
+        delete []_data;
+    }
 
-                Iterator(ArrayList <T> *host,int position=-1)
-                    : host(host),position(position) {}
-            };
+    ArrayList& operator=(const ArrayList &x)
+	{
+		clear();
+        for(int i=0;i<x.size();i++) add(x.get(i));
+        return *this;
+    }
 
-        /**
-         * Constructs an empty array list with an initial capacity of 1000.
-         */
-        ArrayList()
-            {
-            capacity=1000;
-            nowSize=0;
-            data=new T*[capacity];
+    ArrayList(const ArrayList<T> &x)
+	{
+		_capacity=x.size()*2;
+        _size=0;
+		_data=new T[_capacity];
+        for(int i=0;i<x.size();i++) add(x.get(i));
+    }
+
+    Iterator iterator()
+	{
+        return Iterator(this,-1);
+    }
+
+    bool add(const T &e)
+	{
+        if (_size==_capacity) ensureCapacity(_capacity*2);
+        _data[_size++]=e;
+        return true;
+    }
+
+    void add(int _index,const T &e)
+	{
+		if(_index<0||_index>_size) throw IndexOutOfBound();
+        if (_size==_capacity) ensureCapacity(_capacity*2);
+        for(int i=_size;i>_index;i--) _data[i]=_data[i-1];
+        _data[_index]=e;
+        _size++;
+    }
+    
+	void clear()
+	{
+        delete []_data;
+        _data=new T[_capacity];
+        _size=0;
+    }
+
+    bool contains(const T &e) const
+	{
+        for(int i=0;i<_size;i++)
+            if (_data[i]==e) return true;
+        return false;
+    }
+
+    void ensureCapacity(int _new_capacity) 
+	{
+		if(_capacity>_new_capacity) return;
+        T _tmp[_size];
+        for(int i=0;i<_size;i++) _tmp[i]=_data[i];
+        delete []_data;
+        _capacity=_new_capacity;
+		_data=new T[_new_capacity];
+        for(int i=0;i<_size;i++) _data[i]=_tmp[i];
+    }
+	
+    T& get(int _index)
+	{
+		if(_index<0||_index>=_size) throw IndexOutOfBound();
+        return _data[_index];
+    }
+    
+	const T& get(int _index) const
+	{
+		if(_index<0||_index>=_size) throw IndexOutOfBound();
+        return _data[_index];
+    }
+
+    int indexOf(const T &e) const
+	{
+        for (int i=0;i<_size;i++) if (_data[i]==e) return i;
+        return -1;
+    }
+
+    bool isTmpty() const 
+	{ 
+		return (_size==0);
+	}
+
+	void removeIndex(int _index)
+	{
+		if(_index<0||_index>=_size) throw IndexOutOfBound();
+        for(int i=_index;i<_size-1;i++) _data[i]=_data[i+1];
+        _size--;
+    }
+	
+    bool remove(const T &e)
+	{
+        for (int i=0;i<_size;i++)
+            if (_data[i]==e) 
+			{
+                removeIndex(i);
+                return true;
             }
+    return false;
+    }
 
-        /**
-         * Destructor
-         */
-        ~ArrayList()
-            {
-            clear();
-            delete []data;
-            }
+	void set(int _index,const T &e)
+	{
+		if(_index<0||_index>=_size) throw IndexOutOfBound();
+        _data[_index]=e;
+    }
 
-        /**
-         * Assignment operator
-         */
-        ArrayList& operator=(const ArrayList& x)
-            {
-            clear();
-            for (int i=0;i<x.size();i++) add(x.get(i));
-            return *this;
-            }
+    int size() const
+	{
+        return _size;
+    }
 
-        /**
-         * Copy-constructor
-         */
-        ArrayList(const ArrayList& x)
-            {
-            capacity=x.size()*2;
-            data=new T*[capacity];
-            for (int i=0;i<x.size();i++)
-                add(x.get(i));
-            }
-
-		/**
-         * Appends the specified element to the end of this list.
-		 * Always returns true.
-         */
-        bool add(const T &e)
-            {
-            if (nowSize==capacity)
-                ensureCapacity(capacity*2);
-            data[nowSize++]=new T(e);
-            return true;
-            }
-
-		/**
-		 * Inserts the specified element to the specified position in this list.
-		 * The range of index parameter is [0, size], where index=0 means inserting to the head,
-		 * and index=size means appending to the end.
-		 * @throw IndexOutOfBound
-		 */
-		void add(int index,const T &element)
-            {
-            if (index<0||index>nowSize) throw IndexOutOfBound();
-            if (nowSize==capacity) ensureCapacity(capacity*2);
-            memmove(data+index+1,data+index,(nowSize-index)*sizeof(T));
-            nowSize++;
-            data[index]=new T(element);
-            }
-
-		/**
-		 * Removes all of the elements from this list.
-         */
-        void clear()
-            {
-            while (nowSize) delete data[--nowSize];
-            }
-
-		/**
-         * Returns true if this list contains the specified element.
-         */
-        bool contains(const T &e) const
-            {
-            for (int i=0;i<nowSize;i++)
-                if (*data[i]==e) return true;
-            return false;
-            }
-
-		/**
-		 * Returns a const reference to the element at the specified position in this list.
-		 * The index is zero-based, with range [0, size).
-		 * @throw IndexOutOfBound
-		 */
-		const T& get(int index) const
-            {
-            if (index<0||index>=nowSize) throw IndexOutOfBound();
-            return *data[index];
-            }
-
-		/**
-         * Returns true if this list contains no elements.
-         */
-        bool isTmpty() const {return nowSize==0;}
-
-		/**
-		 * Removes the element at the specified position in this list.
-		 * The index is zero-based, with range [0, size).
-		 * @throw IndexOutOfBound
-		 */
-		T removeIndex(int index)
-            {
-            if (index<0||index>=nowSize) throw IndexOutOfBound();
-            T r=*data[index];
-            delete data[index];
-            nowSize--;
-            memmove(data+index,data+index+1,(nowSize-index)*sizeof(T));
-            return r;
-            }
-
-		/**
-		 * Removes the first occurrence of the specified element from this list, if it is present.
-		 * Returns true if it was present in the list, otherwise false.
-		 */
-		bool remove(const T &e)
-            {
-            int index=indexOf(e);
-            if (index==-1) return false;
-            removeIndex(index);
-            return true;
-            }
-
-		/**
-		 * Replaces the element at the specified position in this list with the specified element.
-		 * The index is zero-based, with range [0, size).
-		 * @throw IndexOutOfBound
-		 */
-		T& set(int index,const T &e)
-            {
-            if (index<0||index>=nowSize) throw IndexOutOfBound();
-            return *data[index]=e;
-            }
-
-		/**
-         * Returns the number of elements in this list.
-         */
-        int size() const {return nowSize;}
-
-		/**
-         * Returns an iterator over the elements in this list in proper sequence.
-         */
-        Iterator iterator()
-            {
-            return Iterator(this,-1);
-            }
-
-        /**
-         * Increases the capacity of this ArrayList instance,if necessary,to ensure that it can hold at least the number of elements specified by the minimum capacity argument.
-         */
-        void ensureCapacity(int newCapacity)
-            {
-            capacity=newCapacity;
-            T **tmp=new T*[capacity];
-            memcpy(tmp,data,nowSize*sizeof(T));
-            delete []data;
-            data=tmp;
-            }
-
-        /**
-         * Returns the index of the first occurrence of the specified element in this list,or -1 if this list does not contain the element.
-         */
-        int indexOf(const T &e) const
-            {
-            for (int i=0;i<nowSize;i++)
-                if (*data[i]==e) return i;
-            return -1;
-            }
-    };
+	bool isEmpty() const
+	{
+		return _size==0;
+	}
+};
 #endif
-

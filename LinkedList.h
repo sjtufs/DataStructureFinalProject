@@ -1,359 +1,247 @@
 #ifndef __LINKEDLIST_H
 #define __LINKEDLIST_H
 
-#include "Utility.h"
-#include <memory.h>
+#include "IndexOutOfBound.h"
+#include "ElementNotExist.h"
 
-/**
- * A linked list.
- *
- * The iterator iterates in the order of the elements being loaded into this list.
- */
-template <class T> class LinkedList
+template <class T>
+class LinkedList
+{
+    struct node
     {
-    public:
-        struct Node
-            {
-            Node *prev,*next;
-            T *data;
-            Node():prev(NULL),next(NULL),data(NULL) {}
-            Node(const T &d):prev(NULL),next(NULL) {data=new T(d);}
-            void insert(const T &e)
-                {
-                Node *add=new Node(e);
-                add->prev=this;
-                add->next=this->next;
-                if (add->next) add->next->prev=add;
-                this->next=add;
-                }
-            ~Node()
-                {
-                delete data;
-                }
-            };
-
-    private:
-        Node *head,*tail;
-        int nowSize;
-
-    public:
-        class Iterator
-            {
-            private:
-                Node *position;
-                LinkedList<T> *host;
-            public:
-                /**
-                 * Returns true if the iteration has more elements.
-                 */
-                bool hasNext()
-                    {
-                    if (position==NULL) return false;
-                    return position->next!=NULL;
-                    }
-
-				/**
-			 	 * Returns the next element in the iteration.
-				 * @throw ElementNotExist exception when hasNext() == false
-				 */
-                T& next()
-                    {
-                    if(!hasNext()) throw ElementNotExist();
-                    position=position->next;
-                    return *(position->data);
-                    }
-
-				/**
-				 * TODO Removes from the underlying collection the last element
-				 * returned by the iterator
-				 * The behavior of an iterator is unspecified if the underlying
-				 * collection is modified while the iteration is in progress in
-				 * any way other than by calling this method.
-				 * @throw ElementNotExist
-				 */
-                void remove()
-                    {
-                    if (position==NULL||position->data==NULL) throw ElementNotExist();
-                    Node *f=position->prev;
-                    if (position==host->tail) host->tail=f;
-                    f->next=position->next;
-                    if (f->next) f->next->prev=f;
-                    delete position;
-                    position=NULL;
-                    --host->nowSize;
-                    }
-
-                void set(const T &e)
-                    {
-                    if (position==NULL||position->data==NULL) throw ElementNotExist();
-                    *position->data=e;
-                    }
-
-                Iterator() {position=NULL;}
-                Iterator(Node *position,LinkedList <T> *host):position(position),host(host) {}
-            };
-
-        /**
-         * Constructs an empty list
-         */
-        LinkedList()
-            {
-            head=tail=new Node();
-            head->prev=head;
-            nowSize=0;
-            }
-
-        /**
-         * Copy constructor
-         */
-        LinkedList(const LinkedList<T> &x)
-            {
-            head=tail=new Node();
-            head->prev=head;
-            nowSize=0;
-            addAll(*this,x);
-            }
-
-        /**
-         * Assignment operator
-         */
-        LinkedList<T>& operator=(const LinkedList<T> &x)
-            {
-            this->clear();
-            addAll(*this,x);
-            return *this;
-            }
-
-        /**
-         * Desturctor
-         */
-        ~LinkedList()
-            {
-            clear();
-            delete head;
-            }
-
-		/**
-         * Appends the specified element to the end of this list.
-         * Always returns true;
-         */
-        bool add(const T &e)
-            {
-            tail->insert(e);
-            while (tail->next) tail=tail->next;
-            nowSize++;
-            return true;
-            }
-
-		/**
-         * Inserts the specified element at the beginning of this list.
-         */
-        void addFirst(const T &e)
-            {
-            head->insert(e);
-            while (tail->next) tail=tail->next;
-            nowSize++;
-            }
-
-		/**
-		 * Insert the specified element to the end of this list.
-		 * Equivalent to add.
-		 */
-		void addLast(const T &e)
-			{
-			add(e);
-			}
-
-		/**
-		 * Inserts the specified element to the specified position in this list.
-		 * The range of index parameter is [0, size], where index=0 means inserting to the head,
-		 * and index=size means appending to the end.
-		 * @throw IndexOutOfBound
-		 */
-        void add(int index,const T &e)
-            {
-            Node *f=head;
-            for(int i=0;i<index;i++)
-                f=f->next;
-            f->insert(e);
-            while (tail->next) tail=tail->next;
-            nowSize++;
-            }
-
-        /**
-         * Removes all of the elements from this list.
-         */
-        void clear()
-            {
-            while (head->next)
-                {
-                Iterator n(head,this);
-                n.next();
-                n.remove();
-                }
-            tail=head;
-            }
-
-        /**
-         * Returns true if this list contains the specified element.
-         */
-        bool contains(const T &e) const
-            {
-            Node *n=head;
-            while (n->next)
-                {
-                n=n->next;
-                if (*(n->data)==e) return true;
-                }
-            return false;
-            }
-
-		/**
-		 * Returns a const reference to the element at the specified position in this list.
-		 * The index is zero-based, with range [0, size).
-		 * @throw IndexOutOfBound
-		 */
-        const T& get(int index) const
-            {
-            Node *n=head;
-            for(int i=0;i<=index;i++)
-                {
-                n=n->next;
-                if (!n) throw IndexOutOfBound();
-                }
-            return *(n->data);
-            }
-
-        /**
-		 * Returns a const reference to the first element.
-		 * @throw ElementNotExist
-		 */
-        const T& getFirst() const
-            {
-            if (head->next==NULL) throw ElementNotExist();
-            return *(head->next->data);
-            }
-
-        /**
-         * Returns a const reference to the last element.
-         * @throw ElementNotExist
-         */
-        const T& getLast() const
-            {
-            if (isEmpty()) throw ElementNotExist();
-            return *(tail->data);
-            }
-
-		/**
-         * Returns true if this list contains no elements.
-         */
-        bool isEmpty() const
-            {
-            return (head==tail);
-            }
-
-        /**
-         * Returns the index of the first ocnrence of the specified element
-         * O(1).
-         * in this list,or -1 if this list does not contain the element.
-         */
-        int indexOf(const T &e) const
-            {
-            Node *n=head;
-            int cnt=0;
-            while (n->next!=NULL)
-                {
-                n=n->next;
-                if (*(n->data)==e) return cnt;
-                ++cnt;
-                }
-            return -1;
-            }
-
-		/**
-		 * Removes the element at the specified position in this list.
-		 * The index is zero-based, with range [0, size).
-		 * @throw IndexOutOfBound
-		 */
-		void removeIndex(int index)
-            {
-            if (index >= nowSize||index<0) throw IndexOutOfBound();
-            Node *n=head;
-            for(int i=0;i<=index;i++) n=n->next;
-            Iterator it(n,this);
-            it.remove();
-            }
-
-		/**
-		 * Removes the first ocnrence of the specified element from this list, if it is present.
-		 * Returns true if it was present in the list, otherwise false.
-		 */
-        bool remove(const T &e)
-            {
-            Node *n=head;
-            while (n->next)
-                {
-                n=n->next;
-                if (*(n->data)==e)
-                    {
-                    Iterator it(n,this);
-                    it.remove();
-                    return true;
-                    }
-                }
-            return false;
-            }
-
-		/**
-		 * Removes the first element from  this list.
-		 * @throw ElementNotExist
-		 */
-		void removeFirst()
-			{
-			if(isEmpty()) throw ElementNotExist();
-			Iterator del(head,this);
-			T r=del.next();
-			del.remove();
-			}
-		/**
-         * Removes the last element from this list.
-         * @throw ElementNotExist
-         */
-        void removeLast()
-            {
-            if (isEmpty()) throw ElementNotExist();
-            Iterator n(tail,this);
-            n.remove();
-            }
-
-		/**
-		 * Replaces the element at the specified position in this list with the specified element.
-		 * The index is zero-based, with range [0, size).
-		 * @throw IndexOutOfBound
-		 */
-        void set(int index,const T &e)
-            {
-            Node *n=head;
-            for(int i=0;i<=index;i++)
-                {
-                n=n->next;
-                if (!n) throw IndexOutOfBound();
-                }
-            *(n->data)=e;
-            }
-
-		/**
-         * Returns the number of elements in this list.
-         */
-        int size() const {return nowSize;}
-
-		/**
-         * Returns an iterator
-         */
-        Iterator iterator()
-            {
-            return Iterator(head,this);
-            }
+        T _data;
+        node *_prev,*_next;
+        node (const T &_dat,node *_pre=NULL,node *_nex=NULL):_data(_dat),_prev(_pre),_next(_nex) {}
+		node():_prev(NULL),_next(NULL) {}
+        ~node() {};
     };
-#endif
 
+private:
+    node *_head,*_tail;
+    int _size;
+
+public:
+    class Iterator
+    {
+        bool _flag;
+        node *_position;
+        LinkedList *_list;
+    public:
+        Iterator(LinkedList *_lis=NULL):_list(_lis),_flag(false)
+        {
+            _position=_list->_head;
+        }
+        
+		bool hasNext()
+        {
+            return _position->_next!=_list->_tail;
+        }
+
+        const T &next()
+        {
+            if(!hasNext()) throw ElementNotExist();
+            _position=_position->_next;
+			_flag=true;
+            return _position->_data;
+        }
+
+        void remove()
+        {
+            if(_flag==false) throw ElementNotExist();
+            node *_tmp=_position->_prev;
+            _tmp->_next=_position->_next;
+            _position->_next->_prev=_tmp;
+            delete _position;
+            _list->_size--;
+			_position=_tmp;
+			_flag=false;
+        }
+    };
+	
+	node* _get_index(int _index)
+    {
+        if(_index<0||_index>=_size) throw IndexOutOfBound();
+        node *_pos=_head->_next;
+        while(_index--) _pos=_pos->_next;
+        return _pos;
+    }
+    
+	LinkedList()
+    {
+		_size=0;
+		_head=new node;
+		_tail=new node;
+        _head->_next=_tail;
+		_tail->_prev=_head;
+    }
+    
+	void clear()
+    {
+        node *_last,*_pos=_head->_next;
+		while(_pos!=_tail)
+		{
+			_last=_pos;
+			_pos=_pos->_next;
+			delete _last;
+		}
+        _head->_next=_tail;
+		_tail->_prev=_head;
+		_size=0;
+	}
+
+	LinkedList<T>& operator=(const LinkedList<T> &_x)
+	{
+		clear();
+		_size=_x>_size;
+		node *_pos=_head,*_x_pos=_x._head->_next,*_newnode;
+		while(_x_pos!=_x._tail)
+		{
+			_newnode=new node(_x_pos->_data,_pos,NULL);
+			_pos->_next=_newnode;
+			_pos=_pos->_next;
+			_x_pos=_x_pos->_next;
+		}
+		_pos->_next=_tail;
+		_tail->_prev=_pos;
+	}
+
+	LinkedList(const LinkedList<T> &_x)
+	{
+		_size=_x._size;
+		_head=new node;
+		_tail=new node();
+		node *_pos=_head,*_x_pos=_x._head->_next,*_newnode;
+		while(_x_pos!=_x._tail)
+		{
+			_newnode=new node(_x_pos->_data,_pos,NULL);
+			_pos->_next=_newnode;
+			_pos=_pos->_next;
+			_x_pos=_x_pos->_next;
+		}
+		_pos->_next=_tail;
+		_tail->_prev=_pos;
+	}
+
+    ~LinkedList()
+	{
+		clear();
+	}
+
+    bool add(const T &_E)
+    {
+        node *_newnode=new node(_E,_tail->_prev,_tail);
+        _tail->_prev->_next=_newnode;
+        _tail->_prev=_newnode;
+        _size++;
+        return true;
+    }
+
+    void addFirst(const T &_E)
+    {
+        node *_newnode=new node(_E,_head,_head->_next);
+        _head->_next->_prev=_newnode;
+        _head->_next=_newnode;
+        _size++;
+    }
+
+    void addLast(const T &_E)
+	{
+		add(_E);
+	}
+
+    void add(int _index,const T &_E)
+    {
+        node *_pos=_get_index(_index);
+        node *_newnode=new node(_E,_pos->_prev,_pos);
+        _pos->_prev->_next=_newnode;
+		_pos->_prev=_newnode;
+		_size++;
+    }
+
+	bool contains(const T &_E) const
+	{
+		node *_pos=_head->_next;
+		while(_pos!=_tail)
+			if(_pos->_data==_E) return true;
+			else _pos=_pos->_next;
+		return false;
+	}
+
+	const T& get(int _index) const
+    {
+        if(_index<0||_index>=_size) throw IndexOutOfBound();
+        node *_pos=_head->_next;
+		while(_index--) _pos=_pos->_next;
+        return _pos->_data;
+    }
+
+    const T& getFirst() const
+    {
+        if(isEmpty()) throw ElementNotExist();
+        return get(0);
+    }
+
+    const T& getLast() const
+    {
+        if(isEmpty()) throw ElementNotExist();
+        return get(_size-1);
+    }
+
+    bool isEmpty() const
+    {
+        return _size==0;
+    }
+
+    void removeIndex(int _index)
+    {
+        if(_index<0||_index>=_size) throw IndexOutOfBound();
+        node *_pos=_get_index(_index);
+        _pos->_prev->_next=_pos->_next;
+        _pos->_next->_prev=_pos->_prev;
+        delete _pos;
+		_size--;
+    }
+
+    bool remove(const T &_E)
+    {
+        node *_pos=_head->_next;
+        for (int __i=0;__i<_size;__i++)
+			if(_pos->_data==_E)
+			{
+				removeIndex(__i);
+				return true;
+			}
+			else _pos=_pos->_next;
+        return 0;
+    }
+
+    void removeFirst()
+    {
+        if(isEmpty()) throw ElementNotExist();
+        removeIndex(0);
+    }
+
+    void removeLast()
+    {
+        if(isEmpty()) throw ElementNotExist();
+        removeIndex(_size-1);
+    }
+
+    void set(int _index,const T &_E)
+    {
+        if(_index<0||_index>=_size) throw IndexOutOfBound();
+        node *_pos=_get_index(_index);
+        _pos->_data=_E;
+    }
+
+    int size() const
+	{ 
+		return _size;
+	}
+
+    Iterator iterator()
+    {
+        return Iterator(this);
+    }
+};
+#endif
