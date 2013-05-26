@@ -33,24 +33,20 @@ public:
 
 		bool hasNext()
 		{
-			return pos!=array->_size-1;
+			return pos<array->_size-1;
 		}
-
+	
 		const T& next()
 		{
 			if(!hasNext()) throw ElementNotExist();
-			pos++;
 			flag=true;
-			return *(array->list+pos);
+			return array->get(++pos);
 		}
-
+		
 		void remove()
 		{
 			if(flag==false) throw ElementNotExist();
-			for(int i=pos;i<array->_size-1;i++)
-				*(array->list+i)=*(array->list+i+1);
-			array->_size--;
-			pos--;
+			array->removeIndex(pos--);
 			flag=false;
 		}
 	};
@@ -71,27 +67,31 @@ public:
 
 	~ArrayList()
 	{
+		_capacity=0;
+		_size=0;
 		delete []list;
 	}
-
+	
 	ArrayList& operator=(const ArrayList &x)
 	{
-		delete []list;
-		_capacity=x._capacity;
-		_size=x._size;
-		list=new T[_capacity];
-		for(int i=0;i<_size;i++)
-			list[i]=x.list[i];
+		clear();
+		for(int i=0;i<x._size;i++) add(x.get(i));
 		return *this;
 	}
-
+	
 	ArrayList(const ArrayList &x)
 	{
-		_capacity=x._capacity;
-		_size=x._size;
+		_capacity=x._size*2;
+		_size=0;
 		list=new T[_capacity];
-		for(int i=0;i<_size;i++)
-			list[i]=x.list[i];
+		for(int i=0;i<x._size;i++) add(x.get(i));
+	}
+	
+	bool add(const T &e)
+	{
+		if(_size==_capacity) make_space();
+		list[_size++]=e;
+		return true;
 	}
 
 	void add(int index,const T &e)
@@ -104,12 +104,6 @@ public:
 		_size++;
 	}
 
-	bool add(const T &e)
-	{
-		if(_size==_capacity) make_space();
-		list[_size++]=e;
-		return true;
-	}
 
 	void clear()
 	{
