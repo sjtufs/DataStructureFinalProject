@@ -31,7 +31,7 @@ public:
         {
             _position=_list->_head;
         }
-        
+
 		bool hasNext()
         {
             return _position->_next!=_list->_tail;
@@ -57,7 +57,7 @@ public:
 			_flag=false;
         }
     };
-	
+
 	node* _get_index(int _index)
     {
         if(_index<0||_index>=_size) throw IndexOutOfBound();
@@ -65,7 +65,7 @@ public:
         while(_index--) _pos=_pos->_next;
         return _pos;
     }
-    
+
 	LinkedList()
     {
 		_size=0;
@@ -74,7 +74,7 @@ public:
         _head->_next=_tail;
 		_tail->_prev=_head;
     }
-    
+
 	void clear()
     {
         node *_last,*_pos=_head->_next;
@@ -201,8 +201,8 @@ public:
         delete _pos;
 		_size--;
     }
-
-    bool remove(const T &_E)
+    
+	bool remove(const T &_E)
     {
         node *_pos=_head->_next;
         for (int __i=0;__i<_size;__i++)
@@ -215,7 +215,7 @@ public:
         return 0;
     }
 
-    void removeFirst()
+	void removeFirst()
     {
         if(isEmpty()) throw ElementNotExist();
         removeIndex(0);
@@ -226,8 +226,8 @@ public:
         if(isEmpty()) throw ElementNotExist();
         removeIndex(_size-1);
     }
-
-    void set(int _index,const T &_E)
+    
+	void set(int _index,const T &_E)
     {
         if(_index<0||_index>=_size) throw IndexOutOfBound();
         node *_pos=_get_index(_index);
@@ -235,7 +235,7 @@ public:
     }
 
     int size() const
-	{ 
+	{
 		return _size;
 	}
 

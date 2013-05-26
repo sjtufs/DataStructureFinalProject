@@ -1,9 +1,7 @@
-#ifndef __T_REEMAP_H
-#define __T_REEMAP_H
+#ifndef __TREEMAP_H
+#define __TREEMAP_H
 
 #include "ElementNotExist.h"
-#include "IndexOutOfBound.h"
-#include <cstdlib>
 
 template<class K,class V>
 class TreeMap
@@ -12,262 +10,305 @@ public:
 	class Entry
 	{
 	public:
-		K _key;
-		V _value;
-		Entry(K _k,V _v)
-		{
-			_key=_k;
-			_value=_v;
-		}
-		K getKey() const { return _key; }
-		V getValue() const { return _value; }
+		K key;
+		V value;
+		Entry(K k,V v):key(k),value(v) {}
+		K getKey() const { return key; }
+		V getValue() const { return value; }
 	};
 
-	struct node
-	{
-		Entry _data;
-		int _aux;
-		node *_L,*_R;
-
-		node (const Entry &_dat):_data(_dat),_L(NULL),_R(NULL)
-		{
-			_aux=std::rand()<<15+std::rand();
-		}
-
-		node():_L(NULL),_R(NULL)
-		{
-			_aux=std::rand()<<15+std::rand();
-		}
-		~node() {}
-	};
-	node *_root;
-	int _size;
-
-	class Iterator
-	{
-	public:
-		K _k;
-		bool _flag;
-		const TreeMap *_treap;
-
-		Iterator(const TreeMap *_tre=NULL):_treap(_tre),_flag(false) {}
-
-		bool hasNext()
-		{
-			if(_treap->_root==NULL) return false;
-			if(_flag==false) return true;
-			if(_treap->_get_next(_treap->_root,_k)!=NULL) return true;
-			return false;
-			//return (!_flag || _treap->get_next(_treap->_root,_k)!=NULL);
-		}
-
-		const Entry& next()
-		{
-			if(hasNext()==false) throw ElementNotExist();
-			node *_Y;
-			if(!_flag) _Y=_treap->_get_min();
-			else _Y=_treap->_get_next(_treap->_root,_k);
-			_flag=true;
-			_k=_Y->_data._key;
-			return _Y->_data;
-		}
+private:
+    struct node
+    {
+		node *L,*R,*F;
+		Entry data;
+		int _size;
+		node ():data(K(),V()),_size(0) {}
+		node(const Entry &dat):data(dat),_size(0) {}
 	};
 
-	void _right_rotate(node *&_X)
+	node *root,*null;
+
+	void update(node *x)
 	{
-		node *_Y=_X->_L;
-		_X->_L=_Y->_R;
-		_Y->_R=_X;
-		_X=_Y;
+		if(x==null) x->_size=0;
+		else x->_size=x->L->_size+x->R->_size+1;
 	}
 
-	void _left_rotate(node *&_X)
+    void leftrotate(node *&x)
 	{
-		node *_Y=_X->_R;
-		_X->_R=_Y->_L;
-		_Y->_L=_X;
-		_X=_Y;
-	}
-
-	void _insert(node *&_X,const Entry &_e)
-	{
-		if(_X==NULL)
+		node *f=x->F;
+		node *y=x->R;
+		if(f!=null)
 		{
-			_X=new node(_e);
-			_size++;
-			return;
+			if(f->L==x) f->L=y;
+			else f->R=y;
 		}
-		else if(_e._key<_X->_data._key)
+		y->F=f;
+		x->R=y->L;
+		if(x->R!=null) x->R->F=x;
+		y->L=x;
+		x->F=y;
+		update(x);
+		update(y);
+		x=y;
+	}
+
+	void rightrotate(node *&x)
+    {
+		node *f=x->F;
+		node *y=x->L;
+		if(f!=null)
 		{
-			_insert(_X->_L,_e);
-			if(_X->_L->_aux>_X->_aux) _right_rotate(_X);
+			if(f->L==x) f->L=y;
+			else f->R=y;
 		}
-		else if(_e._key>_X->_data._key)
+		y->F=f;
+		x->L=y->R;
+		if(x->L!=null) x->L->F=x;
+		y->R=x;
+		x->F=y;
+		update(x);
+		update(y);
+		x=y;
+	}
+
+	node *insert(node *x,Entry &data)
+	{
+		if(x==null)
 		{
-			_insert(_X->_R,_e);
-			if(_X->_R->_aux>_X->_aux) _left_rotate(_X);
+			x=new node(data);
+			x->L=x->R=x->F=null;
+			x->_size=1;
 		}
-		else _X->_data._value=_e._value;
+		else if(data.key<x->data.key)
+		{
+			x->L=insert(x->L,data);
+			x->L->F=x;
+            if(x->L->L->_size>x->R->_size)
+                rightrotate(x);
+		}
+		else if(data.key>x->data.key)
+		{
+			x->R=insert(x->R,data);
+			x->R->F=x;
+            if(x->R->R->_size>x->L->_size)
+                leftrotate(x);
+		}
+		else if(data.key==x->data.key)
+		{
+			//V tmp=data.value;
+			//data.value=x->data.value;
+			//x->data.value=tmp;
+			x->data.value=data.value;
+		}
+		update(x);
+		return x;
 	}
 
-	void _remove(node *&_X,const K &_k)
+	node *erase(node *x,const K &key)
 	{
-		if(_X==NULL) throw ElementNotExist();
-		if(_X->_data._key==_k)
-			if(_X->_L==NULL)
-			{
-				node *_Y=_X;
-				_X=_X->_R;
-				delete _Y;
-				_size--;
-			}
-			else if(_X->_R==NULL)
-			{
-				node *_Y=_X;
-				_X=_X->_L;
-				delete _Y;
-				_size--;
-			}
-			else if(_X->_L->_aux>_X->_R->_aux)
-			{
-				_right_rotate(_X);
-				_remove(_X->_R,_k);
-			}
-			else
-			{
-				_left_rotate(_X);
-				_remove(_X->_L,_k);
-			}
-		else if(_k<_X->_data._key) _remove(_X->_L,_k);
-		else _remove(_X->_R,_k);
-	}
-
-	void _remove_sub(node *&_X)
-	{
-		if(_X==NULL) return;
-		_remove_sub(_X->_L);
-		_remove_sub(_X->_R);
-		node *_Y=_X;
-		_X=NULL;
-		delete _Y;
-	}
-
-	node* _get_next(node *_X,const K &_k) const
-	{
-		if(_X==NULL) return NULL;
-		if(_X->_data._key<=_k) return _get_next(_X->_R,_k);
+		if(x==null) return null;
+		if(key<x->data.key)
+			x->L=erase(x->L,key);
+		else if(key>x->data.key)
+			x->R=erase(x->R,key);
+		else if(x->L==null && x->R==null)
+		{
+			delete x;
+			x=null;
+		}
 		else
 		{
-			node *_Y=_get_next(_X->_L,_k);
-			if(_Y) return _Y;
-			return _X;
+			if(x->L->_size<x->R->_size) leftrotate(x);
+			else rightrotate(x);
+			x=erase(x,key);
+		}
+		update(x);
+		return x;
+	}
+
+
+	node *eraseall(node *x)
+    {
+		if(x==null) return null;
+		x->L=eraseall(x->L);
+		x->R=eraseall(x->R);
+		delete x;
+		return null;
+	}
+
+	node *findkey(const K &key) const
+	{
+		node *x=root;
+		while(x!=null)
+		{
+			if(x->data.key==key) return x;
+			else if(key<x->data.key) x=x->L;
+			else x=x->R;
+		}
+		return x;
+	}
+
+	bool findvalue(node *x,const V &value) const
+    {
+		if(x==null) return false;
+		if(x->data.value==value) return true;
+		if(findvalue(x->L,value)) return true;
+		if(findvalue(x->R,value)) return true;
+		return false;
+	}
+
+public:
+    class Iterator
+    {
+	private:
+		node *p,*null;
+		bool flag;
+
+    public:
+        bool hasNext()
+        {
+			if(p==null||p==NULL) return false;
+			if(p->R!=null||!flag) return true;
+			node *q=p,*x=q->F;
+			while(x!=null)
+			{
+				if(x->L==q) return true;
+				else q=x,x=q->F;
+			}
+			return false;
+		}
+
+        const Entry& next()
+        {
+			if(p==NULL||p==null) throw ElementNotExist();
+			if(!flag)
+			{
+				flag=true;
+				return p->data;
+			}
+			if(p->R!=null)
+			{
+				p=p->R;
+				while(p->L!=null) p=p->L;
+				return p->data;
+			}
+			node *q=p,*x=q->F;
+			while(x!=null)
+			{
+				if(x->L==q) return (p=x)->data;
+				else q=x,x=q->F;
+			}
+			throw ElementNotExist();
+		}
+
+		Iterator(node *p=NULL,node *null=NULL):p(p),null(null),flag(false) {}
+    };
+
+
+    TreeMap()
+    {
+		null=new node();
+		null->F=null->L=null->R=null;
+		root=null;
+	}
+
+    TreeMap(const TreeMap &c)
+    {
+		null=new node();
+		null->F=null->L=null->R=null;
+		root=null;
+		typename TreeMap<K,V>::Iterator it=c.iterator();
+		while(it.hasNext())
+		{
+			Entry d=it.next();
+			put(d.key,d.value);
 		}
 	}
 
-	node* _get_min() const
-	{
-		node *_pos=_root;
-		while(_pos->_L!=NULL) _pos=_pos->_L;
-		return _pos;
-	}
-
-	void _add_all(node *&_X,node *_Y)
-	{
-		if(_Y==NULL) return;
-		_X=new node(_Y->_data);
-		_X->_aux=_Y->_aux;
-		_add_all(_X->_L,_Y->_L);
-		_add_all(_X->_R,_Y->_R);
-	}
-
-	bool _has_key(node *_X,const K &_k,V &_v) const
-	{
-		if(_X==NULL) return false;
-		if(_k==_X->_data._key) { _v=_X->_data._value; return true; }
-		else if(_k<_X->_data._key) return _has_key(_X->_L,_k,_v);
-		else return _has_key(_X->_R,_k,_v);
-	}
-
-	bool _has_value(node *_X,const V &_v) const
-	{
-		if(_X==NULL) return false;
-		return _v==_X->_data._value || _has_value(_X->_L,_v) || _has_value(_X->_R,_v);
-	}
-
-	TreeMap()
-	{
-		_root=NULL;
-		_size=0;
-	}
-
-	~TreeMap()
-	{
+    ~TreeMap()
+     {
 		clear();
+		delete null;
 	}
 
-	TreeMap& operator=(const TreeMap &_X)
-	{
-		_remove_sub(_root);
-		_size=_X._size;
-		_add_all(_root,_X._root);
+    TreeMap& operator=(const TreeMap &c)
+    {
+		clear();
+		typename TreeMap<K,V>::Iterator it=c.iterator();
+		while(it->hasNext())
+        {
+			Entry d=it->next();
+			put(d.key,d.value);
+		}
 	}
 
-	TreeMap(const TreeMap &_X)
-	{
-		_root=NULL;
-		_size=_X._size;
-		_add_all(_root,_X._root);
+    template <class C> TreeMap(const C& c)
+    {
+		null=new node();
+		null->F=null->L=null->R=null;
+		root=null;
+		typename C::Iterator it=c.iterator();
+		while(it->hasNext())
+        {
+			Entry d=it->next();
+			put(d.key,d.value);
+		}
 	}
 
-	Iterator iterator() const
-	{
-		return Iterator(this);
+    Iterator iterator() const
+    {
+		node *p=root;
+		while(p->L!=null) p=p->L;
+		return Iterator(p,null);
 	}
 
-	void clear()
-	{
-		_size=0;
-		_remove_sub(_root);
+    void clear()
+    {
+		root=eraseall(root);
 	}
 
-	bool containsKey(const K &_key) const
-	{
-		V _v;
-		return _has_key(_root,_key,_v);
+    bool containsKey(const K& key) const
+    {
+		return findkey(key)!=null;
 	}
 
-	bool containsValue(const V &_value) const
-	{
-		return _has_value(_root,_value);
+    bool containsValue(const V& value) const
+    {
+		return findvalue(root,value);
 	}
 
-	const V &get(const K &_key) const
-	{
-		V _v;
-		if(!_has_key(_root,_key,_v)) throw ElementNotExist();
-		return _v;
+    const V& get(const K& key) const
+    {
+		node *x=findkey(key);
+		if(x==null) throw ElementNotExist();
+		return x->data.value;
 	}
 
-	bool isEmpty() const
-	{
-		return _size==0;
+    void put(const K& key,const V& value)
+    {
+		Entry p(key,value);
+		root=insert(root,p);
 	}
 
-	void put(const K &_key,const V &_value)
-	{
-		Entry _data(_key,_value);
-		_insert(_root,_data);
+    void remove(const K& key)
+    {
+		int pre=root->_size;
+		root=erase(root,key);
+		if(pre==root->_size) throw ElementNotExist();
 	}
 
-	void remove(const K &_key)
-	{
-		_remove(_root,_key);
-	}
+    int size() const
+    {
+        return root->_size;
+    }
 
-	int size() const
+	bool isEmpty() const 
 	{
-		return _size;
+		return root==null; 
 	}
 };
 
 #endif
+
