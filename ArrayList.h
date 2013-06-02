@@ -8,122 +8,95 @@ template<class T>
 class ArrayList
 {
 private:
-	T *list;
+	T *_list;
 	int _capacity,_size;
 
 	void make_space()
 	{
-		T *tmp=list;
+		T *__TMP=_list;
 		_capacity*=2;
-		list=new T[_capacity];
-		for(int i=0;i<_size;i++)
-			list[i]=tmp[i];
-		delete []tmp;
+		_list=new T[_capacity];
+		for(int __I=0;__I<_size;__I++)
+			_list[__I]=__TMP[__I];
+		delete []__TMP;
 	}
 
 public:
-	class Iterator
-	{
-	public:
-		int pos;
-		bool flag;
-		ArrayList *array;
-
-		Iterator(ArrayList *arr=NULL):array(arr),pos(-1),flag(false) {}
-
-		bool hasNext()
-		{
-			return pos<array->_size-1;
-		}
-	
-		const T& next()
-		{
-			if(!hasNext()) throw ElementNotExist();
-			flag=true;
-			return array->get(++pos);
-		}
-		
-		void remove()
-		{
-			if(flag==false) throw ElementNotExist();
-			array->removeIndex(pos--);
-			flag=false;
-		}
-	};
+	class Iterator;
 
 	ArrayList()
 	{
 		_capacity=100;
 		_size=0;
-		list=new T[_capacity];
+		_list=new T[_capacity];
 	}
 
-	ArrayList(int initial_capacity)
+	ArrayList(int _initial_capacity)
 	{
-		_capacity=initial_capacity;
+		_capacity=_initial_capacity;
 		_size=0;
-		list=new T[initial_capacity];
+		_list=new T[_initial_capacity];
 	}
 
 	~ArrayList()
 	{
 		_capacity=0;
 		_size=0;
-		delete []list;
+		delete []_list;
 	}
-	
-	ArrayList& operator=(const ArrayList &x)
+
+	ArrayList& operator=(const ArrayList &_X)
 	{
 		clear();
-		for(int i=0;i<x._size;i++) add(x.get(i));
+		for(int __I=0;__I<_X._size;__I++) add(_X.get(__I));
 		return *this;
 	}
-	
-	ArrayList(const ArrayList &x)
+
+	ArrayList(const ArrayList &_X)
 	{
-		_capacity=x._size*2;
+		_capacity=_X._size*2;
 		_size=0;
-		list=new T[_capacity];
-		for(int i=0;i<x._size;i++) add(x.get(i));
+		_list=new T[_capacity];
+		for(int __I=0;__I<_X._size;__I++) add(_X.get(__I));
 	}
-	
-	bool add(const T &e)
+
+	bool add(const T &_E)
 	{
 		if(_size==_capacity) make_space();
-		list[_size++]=e;
+		_list[_size++]=_E;
 		return true;
 	}
 
-	void add(int index,const T &e)
+	void add(int _index,const T &_E)
 	{
-		if(index<0||index>_size) throw IndexOutOfBound();
+		if(_index<0||_index>_size) throw IndexOutOfBound();
 		if(_size==_capacity) make_space();
-		for(int i=_size;i>index;i--)
-			list[i]=list[i-1];
-		list[index]=e;
+		for(int __I=_size;__I>_index;__I--)
+			_list[__I]=_list[__I-1];
+		_list[_index]=_E;
 		_size++;
 	}
 
 
 	void clear()
 	{
-		delete []list;
-		list=new T[_capacity];
+		delete []_list;
+		_list=new T[_capacity];
 		_size=0;
 	}
 
-	bool contains(const T &e) const
+	bool contains(const T &_E) const
 	{
-		for(int i=0;i<_size;i++)
-		 if(list[i]==e)
+		for(int __I=0;__I<_size;__I++)
+		 if(_list[__I]==_E)
 			 return true;
 		return false;
 	}
 
-	const T& get(int index) const
+	const T& get(int _index) const
 	{
-		if(index<0||index>=_size) throw IndexOutOfBound();
-		return list[index];
+		if(_index<0||_index>=_size) throw IndexOutOfBound();
+		return _list[_index];
 	}
 
 	bool isEmpty() const
@@ -131,29 +104,29 @@ public:
 		return _size==0;
 	}
 
-	void removeIndex(int index)
+	void removeIndex(int _index)
 	{
-		if(index<0||index>=_size) throw IndexOutOfBound();
-		for(int i=index;i<_size-1;i++)
-			list[i]=list[i+1];
+		if(_index<0||_index>=_size) throw IndexOutOfBound();
+		for(int __I=_index;__I<_size-1;__I++)
+			_list[__I]=_list[__I+1];
 		_size--;
 	}
 
-	bool remove(const T &e)
+	bool remove(const T &_E)
 	{
-		for(int i=0;i<_size;i++)
-			if(list[i]==e)
+		for(int __I=0;__I<_size;__I++)
+			if(_list[__I]==_E)
 			{
-				removeIndex(i);
+				removeIndex(__I);
 				return true;
 			}
 		return false;
 	}
 
-	void set(int index,const T &e)
+	void set(int _index,const T &_E)
 	{
-		if(index<0||index>=_size) throw IndexOutOfBound();
-		list[index]=e;
+		if(_index<0||_index>=_size) throw IndexOutOfBound();
+		_list[_index]=_E;
 	}
 
 	int size() const
@@ -164,6 +137,36 @@ public:
 	Iterator iterator()
 	{
 		return Iterator(this);
+	}
+};
+
+template<class T>
+class ArrayList<T>::Iterator
+{
+public:
+	int _pos;
+	bool _flag;
+	ArrayList *_array;
+
+	Iterator(ArrayList *arr=NULL):_array(arr),_pos(-1),_flag(false) {}
+
+	bool hasNext()
+	{
+		return _pos<_array->_size-1;
+	}
+
+	const T& next()
+	{
+		if(!hasNext()) throw ElementNotExist();
+		_flag=true;
+		return _array->get(++_pos);
+	}
+
+	void remove()
+	{
+		if(_flag==false) throw ElementNotExist();
+		_array->removeIndex(_pos--);
+		_flag=false;
 	}
 };
 

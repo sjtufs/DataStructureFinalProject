@@ -9,100 +9,55 @@ class HashMap
 private:
     int _capacity,_size;
 public:
-    class Entry
-    {
-    public:
-        K key;V value;
-        Entry(K k,V v):key(k),value(v) {}
-        Entry() {}
-        K getKey() const { return key; }
-        V getValue() const{ return value; }
-    };
-    struct node
-    {
-        Entry data;
-        node *next;
-        node(const Entry &dat):data(dat),next(NULL) {}
-        node():next(NULL) {}
-    };
-    node **storage;
+    class Entry;
 
-    class Iterator
-    {
-    private:
-        int cur;
-        node *pos;
-        const HashMap *host;
-    public:
+    struct node;
 
-        bool hasNext() const
-        {
-            if(pos->next) return true;
-            for(int i=cur+1;i<host->_capacity;i++)
-                if(host->storage[i]->next!=NULL)
-                    return true;
-            return false;
-        }
+    node **_storage;
 
-        const Entry &next()
-        {
-            if(!hasNext()) throw ElementNotExist();
-            if(pos->next!=NULL)
-            {
-                pos=pos->next;
-                return pos->data;
-            }
-            for(int i=cur+1;i<host->_capacity;i++)
-                if(host->storage[i]->next!=NULL)
-                {
-                    pos=host->storage[i]->next;cur=i;
-                    return pos->data;
-                }
-        }
-
-        Iterator(const HashMap *hos=NULL):host(hos) {pos=host->storage[0];cur=0;}
-    };
+    class Iterator;
 
     HashMap()
     {
         _capacity=99971;
         _size=0;
-        storage=new node*[_capacity];
-        for(int i=0;i<_capacity;i++)
-            storage[i]=new node;
+        _storage=new node*[_capacity];
+        for(int __I=0;__I<_capacity;__I++)
+            _storage[__I]=new node;
     }
 
-    HashMap(int initial_capacity)
+    HashMap(int _initial_capacity)
     {
-        _capacity=initial_capacity;
+        _capacity=_initial_capacity;
         _size=0;
-        storage=new node*[_capacity];
-        for(int i=0;i<_capacity;i++)
-            storage[i]=new node;
+        _storage=new node*[_capacity];
+        for(int __I=0;__I<_capacity;__I++)
+            _storage[__I]=new node;
     }
 
     ~HashMap()
     {
         clear();
-        for(int i=0;i<_capacity;i++)
-            delete storage[i];
-        delete [] storage;
+        for(int __I=0;__I<_capacity;__I++)
+            delete _storage[__I];
+        delete [] _storage;
     }
 
     HashMap &operator=(const HashMap &x)
     {
+		if(this==&x) return *this;
         clear();
-        for(int i=0;i<_capacity;i++)
-            delete storage[i];
-        delete [] storage;
+        for(int __I=0;__I<_capacity;__I++)
+            delete _storage[__I];
+        delete [] _storage;
         _capacity=x._capacity;
         _size=0;
-        storage=new node*[_capacity];
-        for(int i=0;i<_capacity;i++)
+        _storage=new node*[_capacity];
+        for(int __I=0;__I<_capacity;__I++)
         {
-            storage[i]=new node;
-            for(node *pos=x.storage[i]->next;pos!=NULL;pos=pos->next)
-                insert(pos->data);
+            _storage[__I]=new node;
+            for(node *_pos=x._storage[__I]->_next;_pos!=NULL;_pos=_pos->_next)
+                insert(_pos->_data);
         }
         return *this;
     }
@@ -111,12 +66,12 @@ public:
     {
         _capacity=x._capacity;
         _size=0;
-        storage=new node*[_capacity];
-        for(int i=0;i<_capacity;i++)
+        _storage=new node*[_capacity];
+        for(int __I=0;__I<_capacity;__I++)
         {
-            storage[i]=new node;
-            for(node *pos=x.storage[i]->next;pos!=NULL;pos=pos->next)
-                insert(pos->data);
+            _storage[__I]=new node;
+            for(node *_pos=x._storage[__I]->_next;_pos!=NULL;_pos=_pos->_next)
+                insert(_pos->_data);
         }
     }
 
@@ -127,39 +82,39 @@ public:
 
     void clear()
     {
-        for(int i=0;i<_capacity;i++)
+        for(int __I=0;__I<_capacity;__I++)
         {
-            for(node* pos=storage[i]->next,*rem;pos!=NULL;rem=pos,pos=pos->next,delete rem)
+            for(node* _pos=_storage[__I]->_next,*_rem;_pos!=NULL;_rem=_pos,_pos=_pos->_next,delete _rem)
                 ;
-            storage[i]->next=NULL;
+            _storage[__I]->_next=NULL;
         }
         _size=0;
     }
 
     bool containsKey(const K &key) const
     {
-        int p=(H::hashCode(key)%_capacity+_capacity)%_capacity;
-        for(node *pos=storage[p]->next;pos!=NULL;pos=pos->next)
-            if(pos->data.key==key)
+        int _P=(H::hashCode(key)%_capacity+_capacity)%_capacity;
+        for(node *_pos=_storage[_P]->_next;_pos!=NULL;_pos=_pos->_next)
+            if(_pos->_data.key==key)
                 return true;
         return false;
     }
 
     bool containsValue(const V &value) const
     {
-        for(int i=0;i<_capacity;i++)
-            for(node *pos=storage[i]->next;pos!=NULL;pos=pos->next)
-                if(pos->data.value==value)
+        for(int __I=0;__I<_capacity;__I++)
+            for(node *_pos=_storage[__I]->_next;_pos!=NULL;_pos=_pos->_next)
+                if(_pos->_data.value==value)
                     return true;
         return false;
     }
 
     const V &get(const K &key) const
     {
-        int p=(H::hashCode(key)%_capacity+_capacity)%_capacity;
-        for(node *pos=storage[p]->next;pos!=NULL;pos=pos->next)
-            if(pos->data.key==key)
-                return pos->data.value;
+        int _P=(H::hashCode(key)%_capacity+_capacity)%_capacity;
+        for(node *_pos=_storage[_P]->_next;_pos!=NULL;_pos=_pos->_next)
+            if(_pos->_data.key==key)
+                return _pos->_data.value;
         throw ElementNotExist();
     }
 
@@ -170,11 +125,11 @@ public:
 
     void put(const K &key,const V &value)
     {
-        int p=(H::hashCode(key)%_capacity+_capacity)%_capacity;
-        for(node *pos=storage[p]->next;pos!=NULL;pos=pos->next)
-            if(pos->data.key==key)
+        int _P=(H::hashCode(key)%_capacity+_capacity)%_capacity;
+        for(node *_pos=_storage[_P]->_next;_pos!=NULL;_pos=_pos->_next)
+            if(_pos->_data.key==key)
             {
-                pos->data.value=value;
+                _pos->_data.value=value;
                 return;
             }
         insert(Entry(key,value));
@@ -182,12 +137,12 @@ public:
 
     void remove(const K &key)
     {
-        int p=(H::hashCode(key)%_capacity+_capacity)%_capacity;
-        for(node *pos=storage[p]->next,*rem=storage[p];pos!=NULL;rem=pos,pos=pos->next)
-            if(pos->data.key==key)
+        int _P=(H::hashCode(key)%_capacity+_capacity)%_capacity;
+        for(node *_pos=_storage[_P]->_next,*_rem=_storage[_P];_pos!=NULL;_rem=_pos,_pos=_pos->_next)
+            if(_pos->_data.key==key)
             {
-                rem->next=pos->next;
-                delete pos;
+                _rem->_next=_pos->_next;
+                delete _pos;
                 --_size;
                 return;
             }
@@ -199,15 +154,69 @@ public:
         return _size;
     }
 
-    void insert(const Entry & e)
+    void insert(const Entry & _E)
     {
-        int p=(H::hashCode(e.key)%_capacity+_capacity)%_capacity;
-        node *data=new node(e);
-        data->next=storage[p]->next;
-        storage[p]->next=data;
+        int _P=(H::hashCode(_E.key)%_capacity+_capacity)%_capacity;
+        node *_data=new node(_E);
+        _data->_next=_storage[_P]->_next;
+        _storage[_P]->_next=_data;
         _size++;
     }
-
 };
 
+template<class K,class V,class H>
+class HashMap<K,V,H>::Entry
+{
+public:
+	K key;V value;
+    Entry(K k,V v):key(k),value(v) {}
+    Entry() {}
+    K getKey() const { return key; }
+    V getValue() const{ return value; }
+};
+
+template<class K,class V,class H>
+struct HashMap<K,V,H>::node
+{
+    Entry _data;
+    node *_next;
+    node(const Entry &dat):_data(dat),_next(NULL) {}
+    node():_next(NULL) {}
+};
+
+template<class K,class V,class H>
+class HashMap<K,V,H>::Iterator
+{
+private:
+    int _cur;
+    node *_pos;
+    const HashMap *_host;
+public:
+	bool hasNext() const
+    {
+        if(_pos->_next) return true;
+		for(int __I=_cur+1;__I<_host->_capacity;__I++)
+	        if(_host->_storage[__I]->_next!=NULL)
+                return true;
+		return false;
+    }
+
+	const Entry &next()
+	{
+		if(!hasNext()) throw ElementNotExist();
+		if(_pos->_next!=NULL)
+        {
+			_pos=_pos->_next;
+			return _pos->_data;
+        }
+        for(int __I=_cur+1;__I<_host->_capacity;__I++)
+            if(_host->_storage[__I]->_next!=NULL)
+			{
+                _pos=_host->_storage[__I]->_next;_cur=__I;
+                return _pos->_data;
+            }
+	}
+
+    Iterator(const HashMap *hos=NULL):_host(hos) {_pos=_host->_storage[0];_cur=0;}
+};
 #endif
